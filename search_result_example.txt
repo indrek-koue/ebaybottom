@@ -1,0 +1,33 @@
+{"Timestamp":"2013-03-15T12:40:32.132Z",
+"Ack":"Success",
+"Build":"E815_CORE_APILW2_15855352_R1",
+"Version":"815",
+	"Item":[
+		{"ItemID":"221201359698",
+		"EndTime":"2013-03-15T12:41:21.000Z",
+		"ViewItemURLForNaturalSearch":"http://www.ebay.com/itm/Apple-iPod-touch-2nd-Generation-32-GB-/221201359698",
+		"ListingType":"Chinese",
+		"GalleryURL":"http://thumbs3.ebaystatic.com/pict/2212013596988080_1.jpg",
+		"PrimaryCategoryID":"73839",
+		"PrimaryCategoryName":"Consumer Electronics:Portable Audio & Headphones:iPods & MP3 Players",
+		"BidCount":13,
+		"ConvertedCurrentPrice":
+			{"Value":71.0,
+			"CurrencyID":"USD"},
+		"ListingStatus":"Active",
+		"TimeLeft":"PT49S",
+		"Title":"Apple iPod touch 2nd Generation (32 GB)",	
+		"ShippingCostSummary":
+			{"ShippingServiceCost":{
+				"Value":0.0,
+				"CurrencyID":"USD"},
+			"ShippingType":"Calculated",
+			"ListedShippingServiceCost":
+				{"Value":0.0,
+				"CurrencyID":"USD"}
+			}
+		},
+		{"ItemID":"....},
+		{"ItemID":"....}
+	],
+"TotalItems":366315,"ItemSearchURL":"http://search.ebay.com/ws/search/SaleSearch?DemandData=1&fsop=32&satitle=ipod"}
