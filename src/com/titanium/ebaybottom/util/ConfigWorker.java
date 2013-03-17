@@ -48,8 +48,8 @@ public class ConfigWorker {
 
 			Section lists = ini.get("CSVLists");
 			categories = lists.get("CATEGORIES").split(",");
-			blackListedUsers = lists.get("MESSAGESTOUSERS").split(",");
-			messagesToUsers = lists.get("BLACKLISTEDUSERS").split(",");
+			blackListedUsers = lists.get("BLACKLISTEDUSERS").split(",");
+			messagesToUsers = lists.get("MESSAGESTOUSERS").split(",");
 			
 			isDebug = ini.get("Dev").get("DEBUG", Boolean.class);
 		} catch (Exception e) {

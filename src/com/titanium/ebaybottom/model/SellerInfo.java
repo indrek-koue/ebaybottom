@@ -10,6 +10,8 @@ public class SellerInfo{
    	private List<String> sellerUserName;
    	private List<String> topRatedSeller;
 
+   	
+   	
  	public List<String> getFeedbackRatingStar(){
 		return this.feedbackRatingStar;
 	}
@@ -39,5 +41,11 @@ public class SellerInfo{
 	}
 	public void setTopRatedSeller(List<String> topRatedSeller){
 		this.topRatedSeller = topRatedSeller;
+	}
+	@Override
+	public String toString() {
+		return String
+				.format("sellerUserName=%s, feedbackScore=%s, positiveFeedbackPercent=%s, ",
+						sellerUserName, feedbackScore, positiveFeedbackPercent);
 	}
 }

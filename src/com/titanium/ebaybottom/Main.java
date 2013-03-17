@@ -48,16 +48,18 @@ public class Main {
 			Util.printUI("config load success:\n" + config.toString());
 		}
 
-		// 2. get user input msg: username, pass, search keyword
-		Util.printUI("AUDENTIMINE (Eelnevalt peab olema EbayBotTom rakendus lubatud eBay kasutajakonto alt)");
-		String username = Util.getUserInput("eBay Username:");
-		String password = Util.getUserInput("Password:");
+		if (!config.isDebug) {
+			// 2. get user input msg: username, pass, search keyword
+			Util.printUI("AUDENTIMINE (Eelnevalt peab olema EbayBotTom rakendus lubatud eBay kasutajakonto alt)");
+			String username = Util.getUserInput("eBay Username:");
+			String password = Util.getUserInput("Password:");
 
-		if (!authenticate(username, password)) {
-			Util.printError("Audentimine ebaõnnestus");
-			return;
-		} else {
-			Util.printUI("audentimine edukas");
+			if (!authenticate(username, password)) {
+				Util.printError("Audentimine ebaõnnestus");
+				return;
+			} else {
+				Util.printUI("audentimine edukas");
+			}
 		}
 
 		while (true) {
@@ -104,14 +106,37 @@ public class Main {
 				returnedItems = advancedResponse.getSearchResult().get(0)
 						.getItem();
 				int counter = 0;
-				
+
 				for (Item item : returnedItems) {
-					Util.printUI(++counter
-							+ ". "
-							+ ((Integer.parseInt(item.getSellerInfo().get(0)
-									.getFeedbackScore().get(0)) >= config.feedbackLimit) ? "removed, has more reviews than "
-									+ config.feedbackLimit
-									: item));
+
+					boolean isOverFeedbackCountLimit = Integer.parseInt(item
+							.getSellerInfo().get(0).getFeedbackScore().get(0)) >= config.feedbackLimit;
+
+					String sellerUsername = item.getSellerInfo().get(0)
+							.getSellerUserName().get(0);
+
+					String isSellerInBlackList = "";
+					for (int i = 0; i < config.blackListedUsers.length; i++) {
+						if (sellerUsername
+								.trim()
+								.toLowerCase()
+								.equals(config.blackListedUsers[i].trim()
+										.toLowerCase())) {
+
+							isSellerInBlackList = config.blackListedUsers[i];
+						}
+					}
+
+					String msg = item.toString();
+
+					if (isOverFeedbackCountLimit)
+						msg = "item removed, seller feedback limit >="
+								+ config.feedbackLimit;
+					else if (!isSellerInBlackList.equals(""))
+						msg = "item removed, seller is black listed: "
+								+ isSellerInBlackList;
+
+					Util.printUI(counter++ + ". " + msg);
 				}
 				// Util.printUI("DONE!");
 			} catch (Exception e) {

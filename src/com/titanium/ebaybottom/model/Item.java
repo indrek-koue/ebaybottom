@@ -196,10 +196,9 @@ public class Item {
 	@Override
 	public String toString() {
 		return String
-				.format("%s, itemId=%s, sellerReviewCount=%s, Condition=%s, Country=%s, "
+				.format("%s, itemId=%s, %s Condition=%s, Country=%s, "
 						+ "location=%s, primaryCategory=%s, returnsAccepted=%s, current price=%s, shipTo=%s, ItemURL=%s]",
-						title.get(0), itemId.get(0), sellerInfo.get(0)
-								.getFeedbackScore().get(0), condition.get(0)
+						title.get(0), itemId.get(0), sellerInfo.get(0), condition.get(0)
 								.getConditionDisplayName().get(0), country
 								.get(0), location.get(0), primaryCategory
 								.get(0).getCategoryName(), returnsAccepted
