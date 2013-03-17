@@ -7,8 +7,8 @@ public class Util {
 		printUI("ERROR:" + o);
 	}
 
-	public static void printDebug(Object o) {
-		if (Main.DEBUG)
+	public static void printDebug(Object o, boolean d) {
+		if (d)
 			printUI("DEBUG:" + o.toString());
 	}
 
