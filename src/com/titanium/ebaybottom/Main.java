@@ -18,15 +18,18 @@ import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.util.EntityUtils;
 
 import com.google.gson.Gson;
+import com.titanium.ebaybottom.model.EbaySearchResult;
 import com.titanium.ebaybottom.model.SearchResult;
 
 public class Main {
 
-//	private static final String SEARCH_KEYWORD = "ipod";
-//	private static final String API_CALL = "FindItems";
-//	private static final String API_VER = "517";
-//	private static final String EBAY_API_PATH = "http://open.api.ebay.com/shopping?";
-//	private static final String API_KEY = "TomThoma-61de-4a88-81bc-38753a959533";
+	// private static final String SEARCH_KEYWORD = "ipod";
+	// private static final String API_CALL = "FindItems";
+	// private static final String API_VER = "517";
+	// private static final String EBAY_API_PATH =
+	// "http://open.api.ebay.com/shopping?";
+	// private static final String API_KEY =
+	// "TomThoma-61de-4a88-81bc-38753a959533";
 
 	private static final boolean DEBUG = true;
 
@@ -36,10 +39,16 @@ public class Main {
 					.execute(new HttpGet(buildUri()));
 
 			String json = EntityUtils.toString(response.getEntity());
-			printDebug(json);
+			String jsonValidVariableNames = json.replace("\"@", "");
+			// printDebug(jsonValidVariableNames);
+			int charsRemoved = json.length() - jsonValidVariableNames.length();
+			printDebug("@ chars removed count:" + charsRemoved);
 
-			SearchResult r = new Gson().fromJson(json, SearchResult.class);
-			printDebug(r);
+			EbaySearchResult r = new Gson().fromJson(jsonValidVariableNames,
+					EbaySearchResult.class);
+			printDebug(r.getFindItemsAdvancedResponse().get(0)
+					.getSearchResult().get(0).getItem().get(0).getSellerInfo()
+					.get(0).getFeedbackScore());
 
 		} catch (Exception e) {
 			printError(e.toString());
@@ -63,9 +72,12 @@ public class Main {
 		// optional
 		uBuilder.setParameter("keywords", "ipod");
 		uBuilder.setParameter("GLOBAL-ID", "EBAY-US");
+		uBuilder.setParameter("outputSelector", "SellerInfo");
+		uBuilder.setParameter("paginationInput.entriesPerPage", "2");
+		
 		String uri = uBuilder.build().toString();
 
-		printUI(uri);
+		printDebug("REQUEST URL:" + uri);
 
 		return uri;
 	}

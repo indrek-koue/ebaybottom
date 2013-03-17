@@ -3,7 +3,7 @@ package com.titanium.ebaybottom.model;
 
 import java.util.List;
 
-public class ConvertedCurrentPrice{
+public class CurrentPrice{
    	private String __value__;
    	private String currencyId;
 

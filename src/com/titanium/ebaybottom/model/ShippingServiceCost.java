@@ -3,26 +3,20 @@ package com.titanium.ebaybottom.model;
 
 import java.util.List;
 
-import com.google.gson.annotations.SerializedName;
-
 public class ShippingServiceCost{
-   
-	@SerializedName("CurrencyID")
-	private String currencyID;
-	
-	@SerializedName("Value")
-   	private Number value;
+   	private String __value__;
+   	private String currencyId;
 
- 	public String getCurrencyID(){
-		return this.currencyID;
+ 	public String get__value__(){
+		return this.__value__;
 	}
-	public void setCurrencyID(String currencyID){
-		this.currencyID = currencyID;
+	public void set__value__(String __value__){
+		this.__value__ = __value__;
 	}
- 	public Number getValue(){
-		return this.value;
+ 	public String getCurrencyId(){
+		return this.currencyId;
 	}
-	public void setValue(Number value){
-		this.value = value;
+	public void setCurrencyId(String currencyId){
+		this.currencyId = currencyId;
 	}
 }
