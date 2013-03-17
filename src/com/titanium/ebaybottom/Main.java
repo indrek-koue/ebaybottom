@@ -44,17 +44,14 @@ public class Main {
 		if (!config.load(new File(".").getCanonicalPath() + "" + PATH)) {
 			Util.printError("loading values from config file failed @ " + PATH);
 			return;
-		}else{
+		} else {
 			Util.printUI("config load success:\n" + config.toString());
 		}
 
 		// 2. get user input msg: username, pass, search keyword
-		Util.printUI("AUDENTIMINE NB! Eelnevalt peab olema EbayBotTom rakendus lubatud eBay kasutajakonto alt");
-		System.out.println("eBay kasutajanimi:");
-		String username = TextIO.getln();
-
-		System.out.println("salasõna:");
-		String password = TextIO.getln();
+		Util.printUI("AUDENTIMINE (Eelnevalt peab olema EbayBotTom rakendus lubatud eBay kasutajakonto alt)");
+		String username = Util.getUserInput("eBay Username:");
+		String password = Util.getUserInput("Password:");
 
 		if (!authenticate(username, password)) {
 			Util.printError("Audentimine ebaõnnestus");
@@ -63,56 +60,66 @@ public class Main {
 			Util.printUI("audentimine edukas");
 		}
 
-		Util.printUI("TOOTE OTSING, palun sisesta OTSINGUSÕNA:");
-		searchKeyword = TextIO.getln();
+		while (true) {
+			searchKeyword = Util.getUserInput("Search Keyword:");
+			try {
+				HttpResponse response = new DefaultHttpClient()
+						.execute(new HttpGet(buildUri()));
 
-		try {
-			HttpResponse response = new DefaultHttpClient()
-					.execute(new HttpGet(buildUri()));
+				String json = EntityUtils.toString(response.getEntity());
+				String jsonValidVariableNames = json.replace("\"@", "");
 
-			String json = EntityUtils.toString(response.getEntity());
-			Util.printDebug(json.length(), config.DEBUG);
-			String jsonValidVariableNames = json.replace("\"@", "");
-			Util.printDebug(jsonValidVariableNames.length(), config.DEBUG);
-			Util.printDebug("@ chars removed count:"
-					+ (json.length() - jsonValidVariableNames.length()),
-					config.DEBUG);
+				Util.printDebug(json.length(), config.isDebug);
+				Util.printDebug(jsonValidVariableNames.length(), config.isDebug);
+				Util.printDebug("@ chars removed count:"
+						+ (json.length() - jsonValidVariableNames.length()),
+						config.isDebug);
 
-			EbaySearchResult result = new Gson().fromJson(
-					jsonValidVariableNames, EbaySearchResult.class);
+				EbaySearchResult result = new Gson().fromJson(
+						jsonValidVariableNames, EbaySearchResult.class);
 
-			if (result.getFindItemsAdvancedResponse().get(0).getErrorMessage() != null) {
-				// we have a error
-				Util.printError(result.getFindItemsAdvancedResponse().get(0)
-						.getErrorMessage().get(0).getError().get(0));
-				return;
+				if (result.getErrorMessage() != null) {
+					// we have a error
+					Util.printError(result.getErrorMessage().get(0).getError()
+							.get(0));
+					return;
+				}
+
+				if (result.getFindItemsAdvancedResponse().get(0)
+						.getErrorMessage() != null) {
+					// we have a error
+					Util.printError(result.getFindItemsAdvancedResponse()
+							.get(0).getErrorMessage().get(0).getError().get(0));
+					return;
+				}
+
+				// response header
+				FindItemsAdvancedResponse advancedResponse = result
+						.getFindItemsAdvancedResponse().get(0);
+				if (advancedResponse.getSearchResult().get(0).getItem() == null) {
+					Util.printError("0 items returned");
+					return;
+				}
+				Util.printUI(advancedResponse);
+				returnedItems = advancedResponse.getSearchResult().get(0)
+						.getItem();
+				int counter = 0;
+				
+				for (Item item : returnedItems) {
+					Util.printUI(++counter
+							+ ". "
+							+ ((Integer.parseInt(item.getSellerInfo().get(0)
+									.getFeedbackScore().get(0)) >= config.feedbackLimit) ? "removed, has more reviews than "
+									+ config.feedbackLimit
+									: item));
+				}
+				// Util.printUI("DONE!");
+			} catch (Exception e) {
+				e.printStackTrace();
+				Util.printError(e);
 			}
-
-			// response header
-			FindItemsAdvancedResponse advancedResponse = result
-					.getFindItemsAdvancedResponse().get(0);
-			if (advancedResponse.getSearchResult().get(0).getItem() == null) {
-				Util.printError("0 items returned");
-				return;
-			}
-			Util.printUI(advancedResponse);
-
-			returnedItems = advancedResponse.getSearchResult().get(0).getItem();
-			int counter = 0;
-			for (Item item : returnedItems) {
-				Util.printUI(++counter
-						+ ". "
-						+ ((Integer.parseInt(item.getSellerInfo().get(0)
-								.getFeedbackScore().get(0)) >= config.feedbackLimit) ? "removed, has more reviews than "
-								+ config.feedbackLimit
-								: item));
-			}
-
-			Util.printUI("DONE!");
-		} catch (Exception e) {
-			e.printStackTrace();
-			Util.printError(e);
 		}
+
 	}
 
 	private static boolean authenticate(String username2, String password) {
@@ -131,7 +138,7 @@ public class Main {
 
 		// optional
 		uBuilder.addParameter("keywords", searchKeyword);
-		uBuilder.addParameter("GLOBAL-ID", config.LOCALE);
+		uBuilder.addParameter("GLOBAL-ID", config.locale);
 		uBuilder.addParameter("outputSelector", "SellerInfo");
 		uBuilder.addParameter("paginationInput.entriesPerPage",
 				String.valueOf(config.resultCount));
@@ -142,7 +149,7 @@ public class Main {
 		composePriceParams(uBuilder);
 
 		String uri = uBuilder.build().toString();
-		Util.printDebug("REQUEST URL:" + uri, config.DEBUG);
+		Util.printDebug("REQUEST URL:" + uri, config.isDebug);
 		return uri;
 	}
 
@@ -210,15 +217,18 @@ public class Main {
 
 		// http://developer.researchadvanced.com/tools/categoryBrowser.php
 
-		// Consumer Electronics;
-		config.Categories.add(293);
-		// Vehicle Electronics & GPS;
-		config.Categories.add(3270);
-		// GPS Units
-		config.Categories.add(156955);
+		// // Consumer Electronics;
+		// config.categories.add(293);
+		// // Vehicle Electronics & GPS;
+		// config.categories.add(3270);
+		// // GPS Units
+		// config.categories.add(156955);
 
-		for (int categoryId : config.Categories) {
-			uBuilder.addParameter("categoryId", categoryId + "");
-		}
+		for (int i = 0; i <= config.categories.length && i < 3; i++)
+			uBuilder.addParameter("categoryId", config.categories[i]);
+
+		// for (int categoryId : config.categories) {
+		// uBuilder.addParameter("categoryId", categoryId + "");
+		// }
 	}
 }

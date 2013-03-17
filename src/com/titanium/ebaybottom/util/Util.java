@@ -13,6 +13,12 @@ public class Util {
 	}
 
 	public static void printUI(Object o) {
-		System.out.println("::" + o + "\n");
+		System.out.println("::" + o);
+	}
+
+	public static String getUserInput(String header) {
+		System.out.print("\n### " + header);
+		return TextIO.getln();
+
 	}
 }

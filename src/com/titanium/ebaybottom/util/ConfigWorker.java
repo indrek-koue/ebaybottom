@@ -18,16 +18,16 @@ public class ConfigWorker {
 	public int resultCount;
 	public int feedbackLimit;
 
-	public List<Integer> Categories = new ArrayList<>();
-	public List<String> BlackListedUsers = new ArrayList<>();
-	public List<String> MessagesToUsers = new ArrayList<>();
+	public String[] categories;
+	public String[] blackListedUsers;
+	public String[] messagesToUsers;
 
-	public String LOCALE = "EBAY-US";
-	public boolean DEBUG = true;
+	public String locale;
+	public boolean isDebug;
 
 	public boolean load(String path) {
 		try {
-			 Util.printUI("Load config.ini from:" + path);
+			Util.printUI("Load config.ini from:" + path);
 
 			File f = new File(path);
 
@@ -40,17 +40,18 @@ public class ConfigWorker {
 			Ini ini = new Ini(f);
 
 			Section main = ini.get("BotMain");
-
 			minPrice = main.get("MIN_PRICE", Integer.class);
 			maxPrice = main.get("MAX_PRICE", Integer.class);
 			resultCount = main.get("RESULT_COUNT", Integer.class);
 			feedbackLimit = main.get("FEEDBACK_LIMIT_FILTER", Integer.class);
+			locale = main.get("LOCALE");
 
-			Section lists = ini.get("BotMain");
-			Section dev = ini.get("BotMain");
+			Section lists = ini.get("CSVLists");
+			categories = lists.get("CATEGORIES").split(",");
+			blackListedUsers = lists.get("MESSAGESTOUSERS").split(",");
+			messagesToUsers = lists.get("BLACKLISTEDUSERS").split(",");
 			
-			
-
+			isDebug = ini.get("Dev").get("DEBUG", Boolean.class);
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -62,11 +63,12 @@ public class ConfigWorker {
 
 	@Override
 	public String toString() {
+		
 		return String
 				.format("MIN_PRICE=%s\nMAX_PRICE=%s\nRESULT_COUNT=%s\nLOCALE=%s\nDEBUG=%s\n"
 						+ "Categories=%s\nBlackListedUsers=%s\nMessagesToUsers=%s\nFeedbackLimit=%s",
-						minPrice, maxPrice, resultCount, LOCALE, DEBUG,
-						Categories, BlackListedUsers, MessagesToUsers,
+						minPrice, maxPrice, resultCount, locale, isDebug,
+						categories.length, blackListedUsers.length, messagesToUsers.length,
 						feedbackLimit);
 	}
 
