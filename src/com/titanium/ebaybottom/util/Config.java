@@ -11,21 +11,24 @@ import org.ini4j.Ini;
 import org.ini4j.InvalidFileFormatException;
 import org.ini4j.Profile.Section;
 
-public class ConfigWorker {
+import com.titanium.ebaybottom.model.UserMessage;
 
-	public int minPrice;
-	public int maxPrice;
-	public int resultCount;
-	public int feedbackLimit;
+public class Config {
 
-	public String[] categories;
-	public String[] blackListedUsers;
-	public String[] messagesToUsers;
+	public static int minPrice;
+	public static int maxPrice;
+	public static int resultCount;
+	public static int feedbackLimit;
 
-	public String locale;
-	public boolean isDebug;
+	public static String[] categories;
+	public static String[] blackListedUsers;
+	// public static String[] messagesToUsers;
+	public static List<UserMessage> messagesToUsers;
 
-	public boolean load(String path) {
+	public static String locale;
+	public static boolean isDebug;
+
+	public static boolean load(String path) {
 		try {
 			Util.printUI("Load config.ini from:" + path);
 
@@ -49,8 +52,8 @@ public class ConfigWorker {
 			Section lists = ini.get("CSVLists");
 			categories = lists.get("CATEGORIES").split(",");
 			blackListedUsers = lists.get("BLACKLISTEDUSERS").split(",");
-			messagesToUsers = lists.get("MESSAGESTOUSERS").split(",");
-			
+			messagesToUsers = parseMessagesToUser(lists.get("MESSAGESTOUSERS"));
+
 			isDebug = ini.get("Dev").get("DEBUG", Boolean.class);
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
@@ -61,15 +64,27 @@ public class ConfigWorker {
 		return true;
 	}
 
-	@Override
-	public String toString() {
-		
+	private static List<UserMessage> parseMessagesToUser(String s) {
+
+		List<UserMessage> result = new ArrayList<UserMessage>();
+
+		String[] messages = s.split(",");
+
+		for (String msg : messages) {
+			result.add(new UserMessage(msg.split("#")[0], msg.split("#")[1]));
+		}
+
+		return result;
+	}
+
+	public static String string() {
+
 		return String
 				.format("MIN_PRICE=%s\nMAX_PRICE=%s\nRESULT_COUNT=%s\nLOCALE=%s\nDEBUG=%s\n"
 						+ "Categories=%s\nBlackListedUsers=%s\nMessagesToUsers=%s\nFeedbackLimit=%s",
 						minPrice, maxPrice, resultCount, locale, isDebug,
-						categories.length, blackListedUsers.length, messagesToUsers.length,
-						feedbackLimit);
+						categories.length, blackListedUsers.length,
+						messagesToUsers.size(), feedbackLimit);
 	}
 
 }

@@ -24,127 +24,197 @@ import com.titanium.ebaybottom.model.EbaySearchResult;
 import com.titanium.ebaybottom.model.FindItemsAdvancedResponse;
 import com.titanium.ebaybottom.model.Item;
 import com.titanium.ebaybottom.model.SearchResult;
+import com.titanium.ebaybottom.model.UserMessage;
 import com.titanium.ebaybottom.util.ApiKey;
-import com.titanium.ebaybottom.util.ConfigWorker;
+import com.titanium.ebaybottom.util.Config;
 import com.titanium.ebaybottom.util.TextIO;
 import com.titanium.ebaybottom.util.Util;
 
 public class Main {
 
 	private static final String PATH = "\\config.ini";
-	private static String searchKeyword = "tomtom";
+
+	// private static String searchKeyword = "tomtom";
+
 	private static List<Item> returnedItems;
-	private static ConfigWorker config;
 
 	public static void main(String[] args) throws IOException {
 
-		config = new ConfigWorker();
-
 		// 1. verify config file param parse
-		if (!config.load(new File(".").getCanonicalPath() + "" + PATH)) {
+		if (!Config.load(new File(".").getCanonicalPath() + "" + PATH)) {
 			Util.printError("loading values from config file failed @ " + PATH);
 			return;
 		} else {
-			Util.printUI("config load success:\n" + config.toString());
+			Util.printUI("config load success:\n" + Config.string());
 		}
 
-		if (!config.isDebug) {
-			// 2. get user input msg: username, pass, search keyword
-			Util.printUI("AUDENTIMINE (Eelnevalt peab olema EbayBotTom rakendus lubatud eBay kasutajakonto alt)");
-			String username = Util.getUserInput("eBay Username:");
-			String password = Util.getUserInput("Password:");
+		if (false)
+			connectUserToApp();
 
-			if (!authenticate(username, password)) {
-				Util.printError("Audentimine ebaõnnestus");
+		String searchKeyword = Util.getUserInput("Search Keyword:");
+		returnedItems = parseItems(loadJson(searchKeyword));
+		printItems(returnedItems);
+		selectUserMessagesToSendUI();
+
+		Util.printUI("DONE!");
+	}
+
+	private static void selectUserMessagesToSendUI() {
+		String itemNumbers = Util
+				.getUserInput("Enter sequence numbers of items you wish message to separated with ,  Example: 1,5,6,7,21");
+
+		String[] itemNums = itemNumbers.split(",");
+
+		Util.printUI("You want to send message to " + itemNums.length
+				+ " items\n");
+
+		for (String string : itemNums) {
+			Item selectedItem = returnedItems.get(Integer.parseInt(string));
+			Util.printUI("Select message for item: "
+					+ selectedItem.getTitle().get(0));
+
+			if (Config.messagesToUsers.size() == 0) {
+				Util.printError("you have to enter messages to users in config.ini file");
 				return;
-			} else {
-				Util.printUI("audentimine edukas");
 			}
+
+			for (int i = 0; i < Config.messagesToUsers.size(); i++) {
+				Util.printUI(i + ". " + Config.messagesToUsers.get(i));
+
+			}
+
+			System.out
+					.println("\nEnter sequence number of message you wish to send:\n");
+			int messageIndex = TextIO.getInt();
+
+			Util.printUI(Config.messagesToUsers.get(messageIndex)
+					+ "\nPRODUCT:" + selectedItem.getTitle().get(0));
+
+			TextIO.getln();
+			Util.getUserInput("press ENTER key to confirm");
+
+			if (sendMessageToUser(Config.messagesToUsers.get(messageIndex),
+					selectedItem))
+				Util.printUI("Message sent");
+			else
+				Util.printUI("Message sending failed");
+
+		}
+	}
+
+	private static boolean sendMessageToUser(UserMessage userMessage,
+			Item selectedItem) {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+	private static void connectUserToApp() {
+
+		// 2. get user input msg: username, pass, search keyword
+		Util.printUI("Connecting app EbayBotTom with your user account");
+		String username = Util.getUserInput("eBay Username:");
+		String password = Util.getUserInput("Password:");
+
+		if (!authenticate(username, password)) {
+			Util.printError("Authentication failed");
+		} else {
+			Util.printUI("Authentication success");
 		}
 
-		while (true) {
-			searchKeyword = Util.getUserInput("Search Keyword:");
-			try {
-				HttpResponse response = new DefaultHttpClient()
-						.execute(new HttpGet(buildUri()));
+	}
 
-				String json = EntityUtils.toString(response.getEntity());
-				String jsonValidVariableNames = json.replace("\"@", "");
+	private static void printItems(List<Item> returnedItems) {
+		int counter = 0;
 
-				Util.printDebug(json.length(), config.isDebug);
-				Util.printDebug(jsonValidVariableNames.length(), config.isDebug);
-				Util.printDebug("@ chars removed count:"
-						+ (json.length() - jsonValidVariableNames.length()),
-						config.isDebug);
+		for (Item item : returnedItems) {
 
-				EbaySearchResult result = new Gson().fromJson(
-						jsonValidVariableNames, EbaySearchResult.class);
+			boolean isOverFeedbackCountLimit = Integer.parseInt(item
+					.getSellerInfo().get(0).getFeedbackScore().get(0)) >= Config.feedbackLimit;
 
-				if (result.getErrorMessage() != null) {
-					// we have a error
-					Util.printError(result.getErrorMessage().get(0).getError()
-							.get(0));
-					return;
+			String sellerUsername = item.getSellerInfo().get(0)
+					.getSellerUserName().get(0);
+
+			String isSellerInBlackList = "";
+			for (int i = 0; i < Config.blackListedUsers.length; i++) {
+				if (sellerUsername
+						.trim()
+						.toLowerCase()
+						.equals(Config.blackListedUsers[i].trim().toLowerCase())) {
+
+					isSellerInBlackList = Config.blackListedUsers[i];
 				}
-
-				if (result.getFindItemsAdvancedResponse().get(0)
-						.getErrorMessage() != null) {
-					// we have a error
-					Util.printError(result.getFindItemsAdvancedResponse()
-							.get(0).getErrorMessage().get(0).getError().get(0));
-					return;
-				}
-
-				// response header
-				FindItemsAdvancedResponse advancedResponse = result
-						.getFindItemsAdvancedResponse().get(0);
-				if (advancedResponse.getSearchResult().get(0).getItem() == null) {
-					Util.printError("0 items returned");
-					return;
-				}
-				Util.printUI(advancedResponse);
-				returnedItems = advancedResponse.getSearchResult().get(0)
-						.getItem();
-				int counter = 0;
-
-				for (Item item : returnedItems) {
-
-					boolean isOverFeedbackCountLimit = Integer.parseInt(item
-							.getSellerInfo().get(0).getFeedbackScore().get(0)) >= config.feedbackLimit;
-
-					String sellerUsername = item.getSellerInfo().get(0)
-							.getSellerUserName().get(0);
-
-					String isSellerInBlackList = "";
-					for (int i = 0; i < config.blackListedUsers.length; i++) {
-						if (sellerUsername
-								.trim()
-								.toLowerCase()
-								.equals(config.blackListedUsers[i].trim()
-										.toLowerCase())) {
-
-							isSellerInBlackList = config.blackListedUsers[i];
-						}
-					}
-
-					String msg = item.toString();
-
-					if (isOverFeedbackCountLimit)
-						msg = "item removed, seller feedback limit >="
-								+ config.feedbackLimit;
-					else if (!isSellerInBlackList.equals(""))
-						msg = "item removed, seller is black listed: "
-								+ isSellerInBlackList;
-
-					Util.printUI(counter++ + ". " + msg);
-				}
-				// Util.printUI("DONE!");
-			} catch (Exception e) {
-				e.printStackTrace();
-				Util.printError(e);
 			}
+
+			String msg = item.toString();
+
+			if (isOverFeedbackCountLimit)
+				msg = "item removed, seller feedback limit >="
+						+ Config.feedbackLimit;
+			else if (!isSellerInBlackList.equals(""))
+				msg = "item removed, seller is black listed: "
+						+ isSellerInBlackList;
+
+			Util.printUI(counter++ + ". " + msg);
+		}
+	}
+
+	private static List<Item> parseItems(String jsonValidVariableNames) {
+
+		List<Item> result = new ArrayList<Item>();
+		EbaySearchResult resultSet = new Gson().fromJson(
+				jsonValidVariableNames, EbaySearchResult.class);
+
+		if (resultSet.getErrorMessage() != null) {
+			// we have a error
+			Util.printError(resultSet.getErrorMessage().get(0).getError()
+					.get(0));
+			return result;
 		}
 
+		if (resultSet.getFindItemsAdvancedResponse().get(0).getErrorMessage() != null) {
+			// we have a error
+			Util.printError(resultSet.getFindItemsAdvancedResponse().get(0)
+					.getErrorMessage().get(0).getError().get(0));
+			return result;
+		}
+
+		// response header
+		FindItemsAdvancedResponse advancedResponse = resultSet
+				.getFindItemsAdvancedResponse().get(0);
+
+		if (advancedResponse.getSearchResult().get(0).getItem() == null) {
+			Util.printError("0 items returned");
+			return result;
+		}
+
+		Util.printUI(advancedResponse);
+
+		result = advancedResponse.getSearchResult().get(0).getItem();
+
+		return result;
+	}
+
+	private static String loadJson(String keyword) {
+
+		String returnJson = "";
+		try {
+			HttpResponse response = new DefaultHttpClient()
+					.execute(new HttpGet(buildUri(keyword)));
+
+			String json = EntityUtils.toString(response.getEntity());
+
+			// have to replace @ signs because eBay returns faulty JSON
+			returnJson = json.replace("\"@", "");
+
+			Util.printDebug("@ chars removed count:"
+					+ (json.length() - returnJson.length()));
+
+		} catch (Exception e) {
+			e.printStackTrace();
+			Util.printError(e.toString());
+		}
+
+		return returnJson;
 	}
 
 	private static boolean authenticate(String username2, String password) {
@@ -152,7 +222,7 @@ public class Main {
 		return true;
 	}
 
-	private static String buildUri() throws URISyntaxException {
+	private static String buildUri(String keyword) throws URISyntaxException {
 		URIBuilder uBuilder = new URIBuilder(
 				"http://svcs.ebay.com/services/search/FindingService/v1");
 
@@ -162,11 +232,11 @@ public class Main {
 		uBuilder.addParameter("RESPONSE-DATA-FORMAT", "JSON");
 
 		// optional
-		uBuilder.addParameter("keywords", searchKeyword);
-		uBuilder.addParameter("GLOBAL-ID", config.locale);
+		uBuilder.addParameter("keywords", keyword);
+		uBuilder.addParameter("GLOBAL-ID", Config.locale);
 		uBuilder.addParameter("outputSelector", "SellerInfo");
 		uBuilder.addParameter("paginationInput.entriesPerPage",
-				String.valueOf(config.resultCount));
+				String.valueOf(Config.resultCount));
 		uBuilder.addParameter("SERVICE-VERSION", "1.12.0");
 
 		composeCategoryParams(uBuilder);
@@ -174,7 +244,7 @@ public class Main {
 		composePriceParams(uBuilder);
 
 		String uri = uBuilder.build().toString();
-		Util.printDebug("REQUEST URL:" + uri, config.isDebug);
+		Util.printDebug("REQUEST URL:" + uri);
 		return uri;
 	}
 
@@ -188,10 +258,10 @@ public class Main {
 		// defaults to Currency and itemFilter.paramValue defaults to USD.
 		uBuilder.addParameter("itemFilter(1).name", "MaxPrice");
 		uBuilder.addParameter("itemFilter(1).value",
-				Integer.toString(config.maxPrice));
+				Integer.toString(Config.maxPrice));
 		uBuilder.addParameter("itemFilter(2).name", "MinPrice");
 		uBuilder.addParameter("itemFilter(2).value",
-				Double.toString(config.minPrice));
+				Double.toString(Config.minPrice));
 	}
 
 	public static void composeConditionParams(URIBuilder uBuilder) {
@@ -249,8 +319,8 @@ public class Main {
 		// // GPS Units
 		// config.categories.add(156955);
 
-		for (int i = 0; i <= config.categories.length && i < 3; i++)
-			uBuilder.addParameter("categoryId", config.categories[i]);
+		for (int i = 0; i <= Config.categories.length && i < 3; i++)
+			uBuilder.addParameter("categoryId", Config.categories[i]);
 
 		// for (int categoryId : config.categories) {
 		// uBuilder.addParameter("categoryId", categoryId + "");

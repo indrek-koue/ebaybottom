@@ -7,8 +7,8 @@ public class Util {
 		printUI("ERROR:" + o);
 	}
 
-	public static void printDebug(Object o, boolean d) {
-		if (d)
+	public static void printDebug(Object o) {
+		if (Config.isDebug)
 			printUI("DEBUG:" + o.toString());
 	}
 
@@ -17,8 +17,8 @@ public class Util {
 	}
 
 	public static String getUserInput(String header) {
-		System.out.print("\n### " + header);
-		return TextIO.getln();
+		System.out.print("\n++ " + header+"\n");
+		return TextIO.getlnString();
 
 	}
 }
