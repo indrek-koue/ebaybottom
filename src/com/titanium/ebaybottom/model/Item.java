@@ -193,25 +193,17 @@ public class Item {
 		this.viewItemURL = viewItemURL;
 	}
 
-	@Override
-	public String toString() {
-		return String
-				.format("%s, itemId=%s, %s Condition=%s, Country=%s, "
-						+ "location=%s, primaryCategory=%s, returnsAccepted=%s, current price=%s, shipTo=%s, ItemURL=%s]",
-						title.get(0), itemId.get(0), sellerInfo.get(0), condition.get(0)
-								.getConditionDisplayName().get(0), country
-								.get(0), location.get(0), primaryCategory
-								.get(0).getCategoryName(), returnsAccepted
-								.get(0),
-						sellingStatus.get(0).getCurrentPrice().get(0).get__value__(), shippingInfo
-								.get(0).getShipToLocations().get(0), viewItemURL.get(0));
-	}
-
 	public List<SellerInfo> getSellerInfo() {
 		return sellerInfo;
 	}
 
 	public void setSellerInfo(List<SellerInfo> sellerInfo) {
 		this.sellerInfo = sellerInfo;
+	}
+
+	@Override
+	public String toString() {
+		return String.format("title=%s, price=%s", title, sellingStatus.get(0)
+				.getCurrentPrice().get(0).get__value__());
 	}
 }

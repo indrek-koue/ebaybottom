@@ -5,7 +5,9 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
 
 import org.apache.http.HttpResponse;
@@ -18,6 +20,10 @@ import org.apache.http.client.utils.URLEncodedUtils;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.util.EntityUtils;
+import org.joda.time.DateTime;
+import org.joda.time.format.DateTimeFormat;
+import org.joda.time.format.DateTimeFormatter;
+import org.joda.time.format.ISODateTimeFormat;
 
 import com.google.gson.Gson;
 import com.titanium.ebaybottom.model.EbaySearchResult;
@@ -33,9 +39,6 @@ import com.titanium.ebaybottom.util.Util;
 public class Main {
 
 	private static final String PATH = "\\config.ini";
-
-	// private static String searchKeyword = "tomtom";
-
 	private static List<Item> returnedItems;
 
 	public static void main(String[] args) throws IOException {
@@ -154,7 +157,7 @@ public class Main {
 				msg = "item removed, seller is black listed: "
 						+ isSellerInBlackList;
 
-			Util.printUI(counter++ + ". " + msg);
+			Util.printUI(counter++ + ". " + msg + "\n");
 		}
 	}
 
@@ -239,91 +242,38 @@ public class Main {
 				String.valueOf(Config.resultCount));
 		uBuilder.addParameter("SERVICE-VERSION", "1.12.0");
 
-		composeCategoryParams(uBuilder);
-		composeConditionParams(uBuilder);
-		composePriceParams(uBuilder);
+		// Specifies the category from which you want to retrieve item listings.
+		// This field can be repeated to include multiple categories. Up to
+		// three (3) categories can be specified.
+		// http://developer.researchadvanced.com/tools/categoryBrowser.php
+		for (int i = 0; i <= Config.categories.length && i < 3; i++)
+			uBuilder.addParameter("categoryId", Config.categories[i]);
 
-		String uri = uBuilder.build().toString();
-		Util.printDebug("REQUEST URL:" + uri);
-		return uri;
-	}
-
-	public static void composePriceParams(URIBuilder uBuilder) {
-		// price
-		// ...&itemFilter.name=FreeShippingOnly&itemFilter.value=true...
-		// Some filters take additional parameters. For example, when
-		// using the MaxPrice or MinPrice filters, you can specify the
-		// currency value with itemFilter.paramName and itemFilter.paramValue.
-		// When you use MaxPrice and MinPrice item filters, itemFilter.paramName
-		// defaults to Currency and itemFilter.paramValue defaults to USD.
-		uBuilder.addParameter("itemFilter(1).name", "MaxPrice");
-		uBuilder.addParameter("itemFilter(1).value",
-				Integer.toString(Config.maxPrice));
-		uBuilder.addParameter("itemFilter(2).name", "MinPrice");
-		uBuilder.addParameter("itemFilter(2).value",
-				Double.toString(Config.minPrice));
-	}
-
-	public static void composeConditionParams(URIBuilder uBuilder) {
-		// 1.1.4 Condition: New
-		// 1.1.5 New other (see details);
-		// 1.1.6 Manufacturer refurbished;
-		// 1.1.7 Seller refurbished;
-		// 1.1.8 Used;
-
-		// http://developer.ebay.com/devzone/finding/callref/types/ItemFilterType.html
-		// 1000
-		// New
-		// 1500
-		// New other (see details)
-		// 1750
-		// New with defects
-		// 2000
-		// Manufacturer refurbished
-		// 2500
-		// Seller refurbished
-		// 3000
-		// Used
-		// 4000
-		// Very Good
-		// 5000
-		// Good
-		// 6000
-		// Acceptable
-		// 7000
-		// For parts or not working
-
+		// custom filters, see
+		// more:http://developer.ebay.com/devzone/finding/callref/types/ItemFilterType.html
 		uBuilder.addParameter("itemFilter(0).name", "Condition");
 		uBuilder.addParameter("itemFilter(0).value(0)", "1000");
 		uBuilder.addParameter("itemFilter(0).value(1)", "1500");
 		uBuilder.addParameter("itemFilter(0).value(2)", "2000");
 		uBuilder.addParameter("itemFilter(0).value(3)", "2500");
 		uBuilder.addParameter("itemFilter(0).value(4)", "3000");
-	}
 
-	public static void composeCategoryParams(URIBuilder uBuilder) {
-		// Specifies the category from which you want to retrieve item listings.
-		// This field can be repeated to include multiple categories. Up to
-		// three (3) categories can be specified.
-		//
-		// If a specified category ID doesn't match an existing category for the
-		// site, // eBay returns an invalid-category error message. To determine
-		// valid categories, use the Shopping API GetCategoryInfo call.
+		// defaults to USD.
+		uBuilder.addParameter("itemFilter(1).name", "MaxPrice");
+		uBuilder.addParameter("itemFilter(1).value",
+				Integer.toString(Config.maxPrice));
+		uBuilder.addParameter("itemFilter(2).name", "MinPrice");
+		uBuilder.addParameter("itemFilter(2).value",
+				Double.toString(Config.minPrice));
 
-		// http://developer.researchadvanced.com/tools/categoryBrowser.php
+		// Limits the results to items ending on or after the specified time.
+		// 24h is user request
+		uBuilder.addParameter("itemFilter(3).name", "EndTimeFrom");
+		uBuilder.addParameter("itemFilter(3).value",
+				new DateTime().plusHours(24).toString());
 
-		// // Consumer Electronics;
-		// config.categories.add(293);
-		// // Vehicle Electronics & GPS;
-		// config.categories.add(3270);
-		// // GPS Units
-		// config.categories.add(156955);
-
-		for (int i = 0; i <= Config.categories.length && i < 3; i++)
-			uBuilder.addParameter("categoryId", Config.categories[i]);
-
-		// for (int categoryId : config.categories) {
-		// uBuilder.addParameter("categoryId", categoryId + "");
-		// }
+		String uri = uBuilder.build().toString();
+		Util.printDebug("REQUEST URL:" + uri);
+		return uri;
 	}
 }
