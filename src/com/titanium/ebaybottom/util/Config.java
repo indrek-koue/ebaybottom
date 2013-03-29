@@ -5,27 +5,32 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import org.ini4j.Ini;
 import org.ini4j.InvalidFileFormatException;
 import org.ini4j.Profile.Section;
 
-import com.titanium.ebaybottom.model.UserMessage;
+import com.titanium.ebaybottom.model.KeyValuePair;
 
 public class Config {
 
+	// BotMain
 	public static int minPrice;
 	public static int maxPrice;
 	public static int resultCount;
 	public static int feedbackLimit;
-
-	public static String[] categories;
-	public static String[] blackListedUsers;
-	// public static String[] messagesToUsers;
-	public static List<UserMessage> messagesToUsers;
-
 	public static String locale;
+
+	// csvlists
+	public static List<KeyValuePair> users;
+	public static List<String> keywords;
+	public static List<List<Integer>> categories;
+	public static List<KeyValuePair> messagesToUsers;
+	public static List<String> blackListedUsers;
+
+	// dev
 	public static boolean isDebug;
 
 	public static boolean load(String path) {
@@ -50,9 +55,14 @@ public class Config {
 			locale = main.get("LOCALE");
 
 			Section lists = ini.get("CSVLists");
-			categories = lists.get("CATEGORIES").split(",");
-			blackListedUsers = lists.get("BLACKLISTEDUSERS").split(",");
-			messagesToUsers = parseMessagesToUser(lists.get("MESSAGESTOUSERS"));
+			users = parseKeyValueList(lists.get("USERS"));
+			keywords = Arrays.asList(lists.get("KEYWORDS").split(","));
+
+			categories = parseGroups(lists.get("CATEGORIES"));
+
+			messagesToUsers = parseKeyValueList(lists.get("MESSAGESTOUSERS"));
+			blackListedUsers = Arrays.asList(lists.get("BLACKLISTEDUSERS")
+					.split(","));
 
 			isDebug = ini.get("Dev").get("DEBUG", Boolean.class);
 		} catch (Exception e) {
@@ -64,27 +74,61 @@ public class Config {
 		return true;
 	}
 
-	private static List<UserMessage> parseMessagesToUser(String s) {
+	private static List<List<Integer>> parseGroups(String input) {
 
-		List<UserMessage> result = new ArrayList<UserMessage>();
+		List<List<Integer>> cs = new ArrayList<List<Integer>>();
 
-		String[] messages = s.split(",");
+		for (String rawGroup : input.split("#")) {
 
-		for (String msg : messages) {
-			result.add(new UserMessage(msg.split("#")[0], msg.split("#")[1]));
+			String[] rawMembers = rawGroup.split(",");
+
+			ArrayList<Integer> group = new ArrayList<Integer>();
+
+			for (int i = 0; i < rawMembers.length; i++)
+				group.add(Integer.parseInt(rawMembers[i]));
+
+			cs.add(group);
 		}
+
+		return cs;
+	}
+
+	private static List<KeyValuePair> parseKeyValueList(String input) {
+
+		List<KeyValuePair> result = new ArrayList<KeyValuePair>();
+
+		for (String msg : input.split(","))
+			result.add(new KeyValuePair(msg.split("#")[0], msg.split("#")[1]));
 
 		return result;
 	}
 
-	public static String string() {
+	// public static String string() {
+	//
+	// //categories, blacklisted users, messages to users
+	//
+	//
+	// return String
+	// .format("MIN_PRICE=%s\nMAX_PRICE=%s\nRESULT_COUNT=%s\nLOCALE=%s\nDEBUG=%s\n"
+	// +
+	// "Categories=%s\nBlackListedUsers=%s\nMessagesToUsers=%s\nFeedbackLimit=%s",
+	// minPrice, maxPrice, resultCount, locale, isDebug,
+	// categories.length, blackListedUsers.length,
+	// messagesToUsers.size(), feedbackLimit);
+	// }
+	//
+	public static void print() {
+		System.out
+				.println(String
+						.format("minPrice=%s\nmaxPrice=%s\nresultCount=%s\nfeedbackLimit=%s\nlocale=%s",
+								minPrice, maxPrice, resultCount, feedbackLimit,
+								locale));
 
-		return String
-				.format("MIN_PRICE=%s\nMAX_PRICE=%s\nRESULT_COUNT=%s\nLOCALE=%s\nDEBUG=%s\n"
-						+ "Categories=%s\nBlackListedUsers=%s\nMessagesToUsers=%s\nFeedbackLimit=%s",
-						minPrice, maxPrice, resultCount, locale, isDebug,
-						categories.length, blackListedUsers.length,
-						messagesToUsers.size(), feedbackLimit);
+		Util.printList("users", users);
+		Util.printList("keywords", keywords);
+		Util.printList("categories", categories);
+		Util.printList("messagesToUser", messagesToUsers);
+		Util.printList("blackListedUsers", blackListedUsers);
 	}
 
 }
