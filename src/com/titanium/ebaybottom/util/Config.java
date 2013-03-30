@@ -103,20 +103,6 @@ public class Config {
 		return result;
 	}
 
-	// public static String string() {
-	//
-	// //categories, blacklisted users, messages to users
-	//
-	//
-	// return String
-	// .format("MIN_PRICE=%s\nMAX_PRICE=%s\nRESULT_COUNT=%s\nLOCALE=%s\nDEBUG=%s\n"
-	// +
-	// "Categories=%s\nBlackListedUsers=%s\nMessagesToUsers=%s\nFeedbackLimit=%s",
-	// minPrice, maxPrice, resultCount, locale, isDebug,
-	// categories.length, blackListedUsers.length,
-	// messagesToUsers.size(), feedbackLimit);
-	// }
-	//
 	public static void print() {
 		System.out
 				.println(String

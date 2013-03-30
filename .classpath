@@ -27,5 +27,11 @@
 	<classpathentry kind="lib" path="lib/ini4j-0.5.2-jdk14.jar"/>
 	<classpathentry kind="lib" path="lib/ini4j-0.5.2.jar"/>
 	<classpathentry kind="lib" path="lib/joda-time-2.2.jar"/>
+	<classpathentry kind="lib" path="lib/selenium-java-2.31.0.jar"/>
+	<classpathentry kind="lib" path="lib/commons-io-2.4.jar">
+		<attributes>
+			<attribute name="javadoc_location" value="jar:platform:/resource/EbayBotTom/lib/commons-io-2.4-javadoc.jar!/"/>
+		</attributes>
+	</classpathentry>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

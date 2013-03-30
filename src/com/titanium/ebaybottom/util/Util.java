@@ -7,6 +7,8 @@ import com.titanium.ebaybottom.model.Item;
 import com.titanium.ebaybottom.model.KeyValuePair;
 
 public class Util {
+	public static final String LINE_NUMBER_TO_SELECT = "Line number to select: ";
+
 	public static void printError(Object o) {
 		printUI("ERROR:" + o);
 	}
@@ -22,7 +24,12 @@ public class Util {
 
 	public static String getUserInput(String header) {
 		System.out.print("\n++ " + header + "\n");
-		return TextIO.getlnString();
+		String input = TextIO.getln();
+
+		while (input.equals(""))
+			input = TextIO.getln();
+
+		return input;
 
 	}
 
@@ -47,9 +54,9 @@ public class Util {
 		System.out.println();
 	}
 
-	public static void printItems(List<Item> returnedItems) {
-		for (int i = 0; i < returnedItems.size(); i++) {
-			Util.printUI(i + ". " + returnedItems.get(i) + "\n");
-		}
-	}
+	// public static void printItems(List<Item> returnedItems) {
+	// for (int i = 0; i < returnedItems.size(); i++) {
+	// Util.printUI(i + ". " + returnedItems.get(i) + "\n");
+	// }
+	// }
 }

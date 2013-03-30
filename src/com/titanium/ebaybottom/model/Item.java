@@ -2,6 +2,12 @@ package com.titanium.ebaybottom.model;
 
 import java.util.List;
 
+import org.joda.time.DateTime;
+import org.joda.time.format.DateTimeFormatter;
+import org.joda.time.format.DateTimeFormatterBuilder;
+
+import core.HistoryWriterReader;
+
 public class Item {
 	private List<String> autoPay;
 	private List<Condition> condition;
@@ -203,7 +209,15 @@ public class Item {
 
 	@Override
 	public String toString() {
-		return String.format("title=%s, price=%s", title, sellingStatus.get(0)
-				.getCurrentPrice().get(0).get__value__());
+		return String.format("%s %s %s$ %s %s %s %s", sellerInfo.get(0)
+				.getSellerUserName().get(0), HistoryWriterReader.csvSeparator,
+				sellingStatus.get(0).getCurrentPrice().get(0).get__value__(),
+				HistoryWriterReader.csvSeparator, itemId.get(0),
+				HistoryWriterReader.csvSeparator, title.get(0));
+	}
+
+	public String toLog(String csvSeparator, KeyValuePair userMsg) {
+		return DateTime.now().toString() + " " + csvSeparator + " "
+				+ toString() + csvSeparator + userMsg + "\n";
 	}
 }
