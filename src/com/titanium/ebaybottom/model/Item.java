@@ -6,7 +6,8 @@ import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormatter;
 import org.joda.time.format.DateTimeFormatterBuilder;
 
-import core.HistoryWriterReader;
+import com.titanium.ebaybottom.History;
+
 
 public class Item {
 	private List<String> autoPay;
@@ -210,10 +211,10 @@ public class Item {
 	@Override
 	public String toString() {
 		return String.format("%s %s %s$ %s %s %s %s", sellerInfo.get(0)
-				.getSellerUserName().get(0), HistoryWriterReader.csvSeparator,
+				.getSellerUserName().get(0), History.csvSeparator,
 				sellingStatus.get(0).getCurrentPrice().get(0).get__value__(),
-				HistoryWriterReader.csvSeparator, itemId.get(0),
-				HistoryWriterReader.csvSeparator, title.get(0));
+				History.csvSeparator, itemId.get(0),
+				History.csvSeparator, title.get(0));
 	}
 
 	public String toLog(String csvSeparator, KeyValuePair userMsg) {

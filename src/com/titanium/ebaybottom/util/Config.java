@@ -22,6 +22,7 @@ public class Config {
 	public static int resultCount;
 	public static int feedbackLimit;
 	public static String locale;
+	public static int windowOpenTimeout;
 
 	// csvlists
 	public static List<KeyValuePair> users;
@@ -35,12 +36,12 @@ public class Config {
 
 	public static boolean load(String path) {
 		try {
-			Util.printUI("Load config.ini from:" + path);
+			UI.printUI("Load config.ini from:" + path);
 
 			File f = new File(path);
 
 			if (!f.exists()) {
-				Util.printError(".ini config file not found:" + path);
+				UI.printError(".ini config file not found:" + path);
 				f.createNewFile();
 				return false;
 			}
@@ -53,6 +54,8 @@ public class Config {
 			resultCount = main.get("RESULT_COUNT", Integer.class);
 			feedbackLimit = main.get("FEEDBACK_LIMIT_FILTER", Integer.class);
 			locale = main.get("LOCALE");
+			windowOpenTimeout = Integer.parseInt(main
+					.get("TIMEOUT_BETWEEN_OPEN_PM_WINDOW"));
 
 			Section lists = ini.get("CSVLists");
 			users = parseKeyValueList(lists.get("USERS"));
@@ -68,7 +71,7 @@ public class Config {
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-			Util.printError(e);
+			UI.printError(e);
 		}
 
 		return true;
@@ -106,15 +109,15 @@ public class Config {
 	public static void print() {
 		System.out
 				.println(String
-						.format("minPrice=%s\nmaxPrice=%s\nresultCount=%s\nfeedbackLimit=%s\nlocale=%s",
+						.format("minPrice=%s\nmaxPrice=%s\nresultCount=%s\nfeedbackLimit=%s\nlocale=%s\nwindowOpenTimeoutSec=%s",
 								minPrice, maxPrice, resultCount, feedbackLimit,
-								locale));
+								locale, windowOpenTimeout));
 
-		Util.printList("users", users);
-		Util.printList("keywords", keywords);
-		Util.printList("categories", categories);
-		Util.printList("messagesToUser", messagesToUsers);
-		Util.printList("blackListedUsers", blackListedUsers);
+		UI.printList("users", users);
+		UI.printList("keywords", keywords);
+		UI.printList("categories", categories);
+		UI.printList("messagesToUser", messagesToUsers);
+		UI.printList("blackListedUsers", blackListedUsers);
 	}
 
 }
