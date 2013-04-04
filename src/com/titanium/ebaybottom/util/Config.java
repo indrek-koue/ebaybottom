@@ -72,6 +72,7 @@ public class Config {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 			UI.printError(e);
+			return false;
 		}
 
 		return true;

@@ -2,12 +2,12 @@ package com.titanium.ebaybottom.model;
 
 import java.util.List;
 
+import org.apache.commons.lang3.StringEscapeUtils;
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormatter;
 import org.joda.time.format.DateTimeFormatterBuilder;
 
 import com.titanium.ebaybottom.History;
-
 
 public class Item {
 	private List<String> autoPay;
@@ -210,15 +210,26 @@ public class Item {
 
 	@Override
 	public String toString() {
-		return String.format("%s %s %s$ %s %s %s %s", sellerInfo.get(0)
-				.getSellerUserName().get(0), History.csvSeparator,
-				sellingStatus.get(0).getCurrentPrice().get(0).get__value__(),
-				History.csvSeparator, itemId.get(0),
-				History.csvSeparator, title.get(0));
+
+		String username = sellerInfo.get(0).getSellerUserName().get(0);
+		String price = sellingStatus.get(0).getCurrentPrice().get(0)
+				.get__value__();
+		String positiveCount = sellerInfo.get(0).getFeedbackScore().get(0);
+
+		String template = "%s " + History.csvSeparator + " %s$ "
+				+ History.csvSeparator + " %s " + History.csvSeparator + " %s "
+				+ History.csvSeparator + " %s";
+
+		return String.format(template, username, price, positiveCount,
+				itemId.get(0), title.get(0));
 	}
 
 	public String toLog(String csvSeparator, KeyValuePair userMsg) {
+
+		String userMessageEscaped = StringEscapeUtils.escapeJava(userMsg
+				.getKey() + ":" + userMsg.getValue());
+
 		return DateTime.now().toString() + " " + csvSeparator + " "
-				+ toString() + csvSeparator + userMsg + "\n";
+				+ toString() + csvSeparator + userMessageEscaped + "\n";
 	}
 }

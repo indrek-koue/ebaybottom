@@ -6,13 +6,17 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.io.FileUtils;
+import org.ini4j.jdk14.edu.emory.mathcs.backport.java.util.Arrays;
 
 import com.titanium.ebaybottom.model.Item;
 import com.titanium.ebaybottom.model.KeyValuePair;
 import com.titanium.ebaybottom.util.UI;
+import com.titanium.ebaybottom.util.Util;
 
 public class History {
+	private static final int INDEX_OF_ITEM_ID = 4;
 	public static String csvSeparator = "|";
+	public static ArrayList<String> messagesSentIds;
 
 	public static void write(List<Item> items, List<KeyValuePair> messages) {
 
@@ -20,10 +24,10 @@ public class History {
 			try {
 				String toWrite = items.get(i).toLog(csvSeparator,
 						messages.get(i));
-				
+
 				FileUtils.writeStringToFile(new File(Main.HISTORY_FILE),
 						toWrite, true);
-			
+
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
@@ -31,21 +35,22 @@ public class History {
 		}
 	}
 
-	public static List<String> loadMessageSentItemIds() {
-		List<String> result = new ArrayList<String>();
+	public static void loadMessageSentItemIds() {
+		messagesSentIds = new ArrayList<String>();
 
 		try {
 
 			File f = new File(Main.HISTORY_FILE);
 			if (!f.exists()) {
 				f.createNewFile();
-				return result;
+				return;
 			}
 
 			List<String> log = FileUtils.readLines(f);
 
-			for (String string : log) {
-				result.add(string.split("\\" + csvSeparator)[3]);
+			for (String s : log) {
+				String itemId = s.split("\\" + csvSeparator)[INDEX_OF_ITEM_ID];
+				messagesSentIds.add(Util.cleanString(itemId));
 			}
 
 		} catch (IOException e) {
@@ -53,7 +58,8 @@ public class History {
 			e.printStackTrace();
 		}
 
-		return result;
+		System.out.println(Arrays.toString(History.messagesSentIds.toArray()));
+
 	}
 
 }

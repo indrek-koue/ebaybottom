@@ -10,6 +10,7 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 
+import org.apache.commons.lang3.StringEscapeUtils;
 import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.ClientProtocolException;
@@ -41,6 +42,7 @@ public class Main {
 
 	public static final String CONFIG_FILE = "config.ini";
 	public static final String HISTORY_FILE = "history.txt";
+	private static final int APP_VERSION = 3;
 
 	// superdealsyysi#Stupid123456
 	public static void main(String[] args) throws IOException {
@@ -54,6 +56,8 @@ public class Main {
 			UI.printUI("config load success:\n");
 			Config.print();
 		}
+
+		UI.printUI("Version: " + APP_VERSION);
 
 		// 1. User account selection
 		UI.printListWithIndexNumbers(Config.users);
@@ -75,6 +79,7 @@ public class Main {
 				selectedCategoryGroup);
 		List<Item> invalidRemoved = ResultController
 				.removeInvalid(returnedItems);
+
 		UI.printListWithIndexNumbers(invalidRemoved);
 
 		// 5. Select messages to send
@@ -84,8 +89,8 @@ public class Main {
 		SendPrivateMessage.sendMessagesInQueue(selectedUserAccount);
 
 		// 7. Confirm and write to history
-		if (UI.getUserInput("Was message sending success (yes/no) ? ").trim()
-				.toLowerCase().equals("yes")) {
+		if (UI.getUserInput("Was message sending success (y/n) ? ").trim()
+				.toLowerCase().equals("y")) {
 			// write history
 			History.write(SendPrivateMessage.items, SendPrivateMessage.messages);
 			UI.printUI("logged to history");

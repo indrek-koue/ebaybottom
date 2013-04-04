@@ -3,64 +3,75 @@ package com.titanium.ebaybottom;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.ini4j.jdk14.edu.emory.mathcs.backport.java.util.Arrays;
+
 import com.google.gson.Gson;
 import com.titanium.ebaybottom.model.EbaySearchResult;
 import com.titanium.ebaybottom.model.FindItemsAdvancedResponse;
 import com.titanium.ebaybottom.model.Item;
 import com.titanium.ebaybottom.util.Config;
 import com.titanium.ebaybottom.util.UI;
+import com.titanium.ebaybottom.util.Util;
 
 public class ResultController {
 
 	public static List<Item> removeInvalid(List<Item> items) {
 
-		for (int i = 0; i < items.size(); i++) {
-			Item item = items.get(i);
+		List<Item> filteredItems = new ArrayList<>();
 
+		History.loadMessageSentItemIds();
+		for (Item item : items) {
 			// verify if needs removing
-			boolean isOverFeedbackCountLimit = isSellerOverPositiveFeedbackLimit(item);
-			String isSellerInBlackList = isUserBlackListed(item);
-			boolean isMessageAlreadySent = hasBeenMessageSent(item);
+			boolean isOverFeedbackLimit = isSellerOverPositiveFeedbackLimit(item);
+			boolean isInBlacklist = isUserBlackListed(item);
+			boolean isMsgSent = isMessageSent(item);
 
-			if (Config.isDebug && isMessageAlreadySent)
-				System.out.println("msg sent by itemid");
+			if (isOverFeedbackLimit)
+				UI.printDebug("FILTER: feedback limit | " + item);
+			else if (isInBlacklist)
+				UI.printDebug("FILTER: blacklisted | " + item);
+			else if (isMsgSent)
+				UI.printDebug("FILTER: message sent | " + item);
 
-			// remove
-			if (isOverFeedbackCountLimit || isMessageAlreadySent
-					&& !isSellerInBlackList.equals(""))
-				items.remove(i);
+			// add indexes of items to remove
+			if (!isOverFeedbackLimit && !isMsgSent && !isInBlacklist)
+				filteredItems.add(item);
 		}
 
-		return items;
+		return filteredItems;
 	}
 
-	private static boolean hasBeenMessageSent(Item item) {
+	private static boolean isMessageSent(Item item) {
 		String id = item.getItemId().get(0);
-
-		return History.loadMessageSentItemIds().contains(id);
+		return History.messagesSentIds.contains(Util.cleanString(id));
 	}
 
 	private static boolean isSellerOverPositiveFeedbackLimit(Item item) {
-		boolean isOverFeedbackCountLimit = Integer.parseInt(item
-				.getSellerInfo().get(0).getFeedbackScore().get(0)) >= Config.feedbackLimit;
+		int feedbackCount = Integer.parseInt(item.getSellerInfo().get(0)
+				.getFeedbackScore().get(0));
+
+		boolean isOverFeedbackCountLimit = (feedbackCount >= Config.feedbackLimit);
+		// UI.printDebug(item.getSellerInfo().get(0).getSellerUserName().get(0)
+		// + " count:" + feedbackCount + " removed:"
+		// + isOverFeedbackCountLimit);
+
 		return isOverFeedbackCountLimit;
 	}
 
-	private static String isUserBlackListed(Item item) {
-		String sellerUsername = item.getSellerInfo().get(0).getSellerUserName()
-				.get(0);
+	private static boolean isUserBlackListed(Item item) {
+		String sellerUsername = Util.cleanString(item.getSellerInfo().get(0)
+				.getSellerUserName().get(0));
 
-		String isSellerInBlackList = "";
 		for (int j = 0; j < Config.blackListedUsers.size(); j++) {
-			if (sellerUsername
-					.trim()
-					.toLowerCase()
-					.equals(Config.blackListedUsers.get(j).trim().toLowerCase())) {
+			String sellerBlacklisted = Util.cleanString(Config.blackListedUsers
+					.get(j));
 
-				return Config.blackListedUsers.get(j);
+			if (sellerUsername.equals(sellerBlacklisted)) {
+				// UI.printDebug("BLACKLISTED: " + sellerBlacklisted);
+				return true;
 			}
 		}
-		return isSellerInBlackList;
+		return false;
 	}
 
 	static List<Item> parseItems(String jsonValidVariableNames) {
@@ -71,8 +82,7 @@ public class ResultController {
 
 		if (resultSet.getErrorMessage() != null) {
 			// we have a error
-			UI.printError(resultSet.getErrorMessage().get(0).getError()
-					.get(0));
+			UI.printError(resultSet.getErrorMessage().get(0).getError().get(0));
 			return result;
 		}
 

@@ -64,23 +64,43 @@ public class UI {
 		UI.printUI("You want to send message to " + itemNums.length
 				+ " items\n");
 
+		if (Config.messagesToUsers.size() == 0) {
+			UI.printError("you have to enter messages to users in config.ini file");
+			return;
+		}
+
+		// v3
+		boolean isFirstRun = true;
+		KeyValuePair msg = null;
+
 		for (String string : itemNums) {
 			Item selectedItem = returnedItems.get(Integer.parseInt(string));
-			UI.printUI("Select message for item: "
-					+ selectedItem.getTitle().get(0));
 
-			if (Config.messagesToUsers.size() == 0) {
-				UI.printError("you have to enter messages to users in config.ini file");
-				return;
+			if (isFirstRun) {
+				UI.printUI("Select message for item: "
+						+ selectedItem.getTitle().get(0));
+
+				UI.printListWithIndexNumbers(Config.messagesToUsers);
+
+				msg = Config.messagesToUsers.get(UI
+						.getUserInputInt(UI.LINE_NUMBER_TO_SELECT));
+				isFirstRun = false;
 			}
-
-			UI.printListWithIndexNumbers(Config.messagesToUsers);
-
-			KeyValuePair msg = Config.messagesToUsers.get(UI
-					.getUserInputInt(UI.LINE_NUMBER_TO_SELECT));
-
 			SendPrivateMessage.addToMessageQue(selectedItem, msg);
-
 		}
+
+		// for (String string : itemNums) {
+		// Item selectedItem = returnedItems.get(Integer.parseInt(string));
+		// UI.printUI("Select message for item: "
+		// + selectedItem.getTitle().get(0));
+		//
+		// UI.printListWithIndexNumbers(Config.messagesToUsers);
+		//
+		// KeyValuePair msg = Config.messagesToUsers.get(UI
+		// .getUserInputInt(UI.LINE_NUMBER_TO_SELECT));
+		//
+		// SendPrivateMessage.addToMessageQue(selectedItem, msg);
+		//
+		// }
 	}
 }
