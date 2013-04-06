@@ -6,6 +6,7 @@ import java.util.Set;
 
 import org.openqa.selenium.By;
 import org.openqa.selenium.Cookie;
+import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
@@ -63,6 +64,11 @@ public class SendPrivateMessage {
 			// style="width:109px;height:33px">
 			findElementById(driver, "continueBtnDiv").submit();
 
+			// test- instant text enter
+			JavascriptExecutor js = (JavascriptExecutor) driver;
+			js.executeScript("document.getElementById('qusetOther_cnt_cnt').innerHTML = \""
+					+ selectedMessage.getKey() + "\";");
+
 			// title
 			// <input id="qusetOther_cnt_cnt" class="gryFnt" type="text"
 			// name="qusetOther_cnt_cnt" size="50" maxlength="32" value=""
@@ -71,6 +77,10 @@ public class SendPrivateMessage {
 				findElementById(driver, "qusetOther_cnt_cnt").sendKeys(
 						selectedMessage.getKey());
 
+			js.executeScript("document.getElementById('msg_cnt_cnt').innerHTML = \""
+					+ selectedMessage.getValue() + "\";");
+
+			
 			// message
 			// <textarea id="msg_cnt_cnt" class="gryFnt"
 			// defval="Enter your question here..." name="msg_cnt_cnt" cols="70"
@@ -78,6 +88,9 @@ public class SendPrivateMessage {
 			if (findElementById(driver, "msg_cnt_cnt") != null)
 				findElementById(driver, "msg_cnt_cnt").sendKeys(
 						selectedMessage.getValue());
+			
+			findElementById(driver, "tokenText").click();
+			//TODO: highlight captcha
 		}
 
 		UI.printUI("Message sending setup finished");
@@ -104,9 +117,9 @@ public class SendPrivateMessage {
 			for (Cookie cookie : cookies) {
 				driver.manage().addCookie(cookie);
 			}
-			
+
 			UI.printUI("session copied to browser");
-			
+
 			return;
 		}
 
