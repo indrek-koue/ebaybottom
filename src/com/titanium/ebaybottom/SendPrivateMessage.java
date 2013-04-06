@@ -20,7 +20,7 @@ import com.titanium.ebaybottom.util.TextIO;
 import com.titanium.ebaybottom.util.UI;
 
 public class SendPrivateMessage {
-//	private static final int TIMEOUT_BETWEEN_OPEN_PM_WINDOW = 10;
+	// private static final int TIMEOUT_BETWEEN_OPEN_PM_WINDOW = 10;
 	public static List<Item> items = new ArrayList<>();
 	public static List<KeyValuePair> messages = new ArrayList<>();
 
@@ -43,15 +43,14 @@ public class SendPrivateMessage {
 			KeyValuePair selectedMessage = messages.get(i);
 
 			new WebWindow(driver, composeMessageUrl(selectedItem));
-			//new WebDriverWait(driver, Config.windowOpenTimeout*1000);
+			// new WebDriverWait(driver, Config.windowOpenTimeout*1000);
 			try {
-				Thread.sleep(Config.windowOpenTimeout*1000);
+				Thread.sleep(Config.windowOpenTimeout * 1000);
 			} catch (InterruptedException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
-			
-			
+
 			// select other
 			// <input type="radio" style="margin-top:0px;margin-top:-2px\9;"
 			// name="cat" value="5" id="Other">
@@ -96,6 +95,21 @@ public class SendPrivateMessage {
 
 	private static void logIn(KeyValuePair selectedUserAccount, WebDriver driver) {
 
+		Set<Cookie> cookies = SessionCache.Load(selectedUserAccount);
+
+		// check if has already active session
+		if (cookies != null) {
+			UI.printUI("Session active, skip loggin: " + selectedUserAccount);
+
+			for (Cookie cookie : cookies) {
+				driver.manage().addCookie(cookie);
+			}
+			
+			UI.printUI("session copied to browser");
+			
+			return;
+		}
+
 		UI.printUI("Log in with: " + selectedUserAccount);
 		// username
 		WebElement element = driver.findElement(By.id("userid"));
@@ -110,6 +124,7 @@ public class SendPrivateMessage {
 			driver.findElement(By.id("signed_in")).click();
 
 		element.submit();
+
 	}
 
 	private static WebElement findElementById(WebDriver driver, String id) {
