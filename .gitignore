@@ -6,3 +6,5 @@ ApiKey.java
 *.jar
 *.war
 *.ear
+
+release_bin
