@@ -33,19 +33,19 @@ public class Network {
 	public static WebDriver logIn(KeyValuePair selectedUserAccount) {
 
 		WebDriver driver = new FirefoxDriver();
-		Set<Cookie> cookies = SessionCache.Load(selectedUserAccount);
+		Set<Cookie> cachedCookies = SessionCache.Load(selectedUserAccount);
 
 		// check if has already active session
-		if (cookies != null) {
+		if (cachedCookies != null) {
 			UI.printUI("Session active, skip loggin: " + selectedUserAccount);
-			driver.get("https://signin.ebay.com/ws/eBayISAPI.dll?SignIn");
+			driver.get("http://www.ebay.com/");
 
-			for (Cookie cookie : cookies) {
+			for (Cookie cookie : cachedCookies) {
 				driver.manage().addCookie(cookie);
 			}
 
-			UI.printUI("session copied to browser, cookies: " + cookies.size());
-			driver.get("http://www.ebay.com/itm/Dual-GPS-BT-Receiver-XGPS150-IPAD-IPHONE-IPOD-etc-/150814042955?pt=GPS_Devices");
+			UI.printUI("session copied to browser, cookies: " + cachedCookies.size());
+//			driver.get("http://www.ebay.com/itm/Dual-GPS-BT-Receiver-XGPS150-IPAD-IPHONE-IPOD-etc-/150814042955?pt=GPS_Devices");
 
 		} else {
 			driver.get("https://signin.ebay.com/ws/eBayISAPI.dll?SignIn");

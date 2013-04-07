@@ -30,9 +30,7 @@ public class SessionCache {
 
 		File f = null;
 		try {
-			String path = new File(".").getCanonicalPath() + "\\"
-					+ CACHE_DIRECTORY + "\\" + userAccount.getKey() + ".txt";
-			f = new File(path);
+			f = new File(cobineCacheFilePath(userAccount));
 		} catch (IOException e1) {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
@@ -67,9 +65,7 @@ public class SessionCache {
 		Set<Cookie> cookiesToReturn = new HashSet<>();
 		File f = null;
 		try {
-			String path = new File(".").getCanonicalPath() + "\\"
-					+ CACHE_DIRECTORY + "\\" + userAccount.getKey() + ".txt";
-			f = new File(path);
+			f = new File(cobineCacheFilePath(userAccount));
 		} catch (IOException e1) {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
@@ -100,6 +96,13 @@ public class SessionCache {
 		}
 
 		return cookiesToReturn;
+	}
+
+	private static String cobineCacheFilePath(KeyValuePair userAccount)
+			throws IOException {
+		String path = new File(".").getCanonicalPath() + "\\" + CACHE_DIRECTORY
+				+ "\\" + userAccount.getKey() + ".txt";
+		return path;
 	}
 
 }

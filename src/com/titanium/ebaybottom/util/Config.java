@@ -32,7 +32,7 @@ public class Config {
 	public static List<String> blackListedUsers;
 
 	// dev
-	public static boolean isDebug;
+	public static boolean isDebugLogging;
 
 	public static boolean load(String path) {
 		try {
@@ -67,7 +67,7 @@ public class Config {
 			blackListedUsers = Arrays.asList(lists.get("BLACKLISTEDUSERS")
 					.split(","));
 
-			isDebug = ini.get("Dev").get("DEBUG", Boolean.class);
+			isDebugLogging = ini.get("Dev").get("DEBUG", Boolean.class);
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

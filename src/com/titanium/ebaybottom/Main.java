@@ -44,7 +44,9 @@ public class Main {
 
 	public static final String CONFIG_FILE = "config.ini";
 	public static final String HISTORY_FILE = "history.txt";
-	private static final int APP_VERSION = 3;
+	private static final int APP_VERSION = 4;
+
+	public static boolean isDebug = false;
 
 	// superdealsyysi#Stupid123456
 	public static void main(String[] args) throws IOException {
@@ -59,64 +61,47 @@ public class Main {
 			Config.print();
 		}
 
-		KeyValuePair usr = new KeyValuePair("superdealsyysi", "Stupid123456");
+		UI.printUI("Version: " + APP_VERSION);
 
-		WebDriver driver = Network.logIn(usr);
-//		TextIO.getInt();
-//
-//		SessionCache.Write(usr, driver.manage().getCookies());
-//
-//		driver.manage().deleteAllCookies();
-//
-//		TextIO.getInt();
+		// 1. User account selection
+		UI.printListWithIndexNumbers(Config.users);
+		KeyValuePair selectedUserAccount = Config.users.get(isDebug ? 0 : UI
+				.getUserInputInt(UI.LINE_NUMBER_TO_SELECT));
 
-//		driver = Network.logIn(usr);
-		
-	System.out.println(Arrays.toString(driver.manage().getCookies().toArray()));
-		driver.get("http://www.ebay.com/itm/Dual-GPS-BT-Receiver-XGPS150-IPAD-IPHONE-IPOD-etc-/150814042955?pt=GPS_Devices");
+		// 2. Search keyword selection
+		UI.printListWithIndexNumbers(Config.keywords);
+		String selectedKeyword = Config.keywords.get(isDebug ? 0 : UI
+				.getUserInputInt(UI.LINE_NUMBER_TO_SELECT));
 
-		//
-		// UI.printUI("Version: " + APP_VERSION);
-		//
-		// // 1. User account selection
-		// UI.printListWithIndexNumbers(Config.users);
-		// KeyValuePair selectedUserAccount = Config.users.get(UI
-		// .getUserInputInt(UI.LINE_NUMBER_TO_SELECT));
-		//
-		// // 2. Search keyword selection
-		// UI.printListWithIndexNumbers(Config.keywords);
-		// String selectedKeyword = Config.keywords.get(UI
-		// .getUserInputInt(UI.LINE_NUMBER_TO_SELECT));
-		//
-		// // 3. Category group selection
-		// UI.printListWithIndexNumbers(Config.categories);
-		// List<Integer> selectedCategoryGroup = Config.categories.get(UI
-		// .getUserInputInt(UI.LINE_NUMBER_TO_SELECT));
-		//
-		// // 4. Load filtered items from ebay
-		// List<Item> returnedItems = Network.loadItemsFromEbay(selectedKeyword,
-		// selectedCategoryGroup);
-		// List<Item> invalidRemoved = ResultController
-		// .removeInvalid(returnedItems);
-		//
-		// UI.printListWithIndexNumbers(invalidRemoved);
-		//
-		// // 5. Select messages to send
-		// UI.selectUserPrivateMessages(invalidRemoved);
-		//
-		// // 6. Send messages
-		// SendPrivateMessage.sendMessagesInQueue(selectedUserAccount);
-		//
-		// // 7. Confirm and write to history
-		// if (UI.getUserInput("Was message sending success (y/n) ? ").trim()
-		// .toLowerCase().equals("y")) {
-		// // write history
-		// History.write(SendPrivateMessage.items, SendPrivateMessage.messages);
-		// UI.printUI("logged to history");
-		// } else {
-		// UI.printUI("history cleared");
-		// }
-		//
-		// UI.printUI("DONE!");
+		// 3. Category group selection
+		UI.printListWithIndexNumbers(Config.categories);
+		List<Integer> selectedCategoryGroup = Config.categories.get(isDebug ? 0
+				: UI.getUserInputInt(UI.LINE_NUMBER_TO_SELECT));
+
+		// 4. Load filtered items from ebay
+		List<Item> returnedItems = Network.loadItemsFromEbay(selectedKeyword,
+				selectedCategoryGroup);
+		List<Item> invalidRemoved = ResultController
+				.removeInvalid(returnedItems);
+
+		UI.printListWithIndexNumbers(invalidRemoved);
+
+		// 5. Select messages to send
+		UI.selectUserPrivateMessages(invalidRemoved);
+
+		// 6. Send messages
+		SendPrivateMessage.sendMessagesInQueue(selectedUserAccount);
+
+		// 7. Confirm and write to history
+		if (UI.getUserInput("Was message sending success (y/n) ? ").trim()
+				.toLowerCase().equals("y")) {
+			// write history
+			History.write(SendPrivateMessage.items, SendPrivateMessage.messages);
+			UI.printUI("logged to history");
+		} else {
+			UI.printUI("history cleared");
+		}
+
+		UI.printUI("DONE!");
 	}
 }

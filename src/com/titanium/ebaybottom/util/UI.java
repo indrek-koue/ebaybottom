@@ -16,7 +16,7 @@ public class UI {
 	}
 
 	public static void printDebug(Object o) {
-		if (Config.isDebug)
+		if (Config.isDebugLogging)
 			printUI("DEBUG:" + o.toString());
 	}
 
@@ -56,8 +56,8 @@ public class UI {
 
 	public static void selectUserPrivateMessages(List<Item> returnedItems) {
 
-		String itemNumbers = UI
-				.getUserInput("Enter sequence numbers of items you wish message to separated with ,  Example: 1,5,6,7,21");
+		String itemNumbers = Main.isDebug ? "1,2,3"
+				: UI.getUserInput("Enter sequence numbers of items you wish message to separated with ,  Example: 1,5,6,7,21");
 
 		String[] itemNums = itemNumbers.split(",");
 
@@ -82,7 +82,7 @@ public class UI {
 
 				UI.printListWithIndexNumbers(Config.messagesToUsers);
 
-				msg = Config.messagesToUsers.get(UI
+				msg = Config.messagesToUsers.get(Main.isDebug ? 0 : UI
 						.getUserInputInt(UI.LINE_NUMBER_TO_SELECT));
 				isFirstRun = false;
 			}

@@ -44,7 +44,8 @@ public class SendPrivateMessage {
 			Item selectedItem = items.get(i);
 			KeyValuePair selectedMessage = messages.get(i);
 
-			if (driver.getCurrentUrl().equals("")) {
+			if (!driver.getCurrentUrl().contains(
+					"contact.ebay.com/ws/eBayISAPI.dll?")) {
 				driver.get(composeMessageUrl(selectedItem));
 			} else {
 				new WebWindow(driver, composeMessageUrl(selectedItem));
@@ -62,7 +63,7 @@ public class SendPrivateMessage {
 			// <input type="radio" style="margin-top:0px;margin-top:-2px\9;"
 			// name="cat" value="5" id="Other">
 			WebElement radio = findElementById(driver, "Other");
-			if (!radio.isSelected())
+			if (radio != null && !radio.isSelected())
 				radio.click();
 
 			// continue button
@@ -96,7 +97,8 @@ public class SendPrivateMessage {
 			// findElementById(driver, "msg_cnt_cnt").sendKeys(
 			// selectedMessage.getValue());
 
-			findElementById(driver, "tokenText").click();
+			if (findElementById(driver, "tokenText") != null)
+				findElementById(driver, "tokenText").click();
 			// TODO: highlight captcha
 		}
 
@@ -107,10 +109,17 @@ public class SendPrivateMessage {
 
 	public static void setInstantKeys(WebDriver driver, String id,
 			String selectedMessage) {
-		JavascriptExecutor js2 = (JavascriptExecutor) driver;
-		js2.executeScript(String.format(
-				"document.getElementById(\"%s\").value = \"%s\"", id,
-				StringEscapeUtils.escapeJava(selectedMessage)));
+
+		try {
+			JavascriptExecutor js2 = (JavascriptExecutor) driver;
+			js2.executeScript(String.format(
+					"document.getElementById(\"%s\").value = \"%s\"", id,
+					StringEscapeUtils.escapeJava(selectedMessage)));
+		} catch (Exception e) {
+			UI.printError(e.toString());
+			// e.printStackTrace();
+		}
+
 	}
 
 	private static String composeMessageUrl(Item i) {
@@ -122,7 +131,7 @@ public class SendPrivateMessage {
 		UI.printDebug("MSG URL: " + s);
 		return s;
 	}
-	
+
 	private static WebElement findElementById(WebDriver driver, String id) {
 		try {
 			return driver.findElement(By.id(id));
