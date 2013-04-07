@@ -22,12 +22,52 @@ import com.google.gson.Gson;
 import com.titanium.ebaybottom.model.EbaySearchResult;
 import com.titanium.ebaybottom.model.FindItemsAdvancedResponse;
 import com.titanium.ebaybottom.model.Item;
+import com.titanium.ebaybottom.model.KeyValuePair;
 import com.titanium.ebaybottom.swebdriver.WebWindow;
 import com.titanium.ebaybottom.util.ApiKey;
 import com.titanium.ebaybottom.util.Config;
 import com.titanium.ebaybottom.util.UI;
 
 public class Network {
+
+	public static WebDriver logIn(KeyValuePair selectedUserAccount) {
+
+		WebDriver driver = new FirefoxDriver();
+		Set<Cookie> cookies = SessionCache.Load(selectedUserAccount);
+
+		// check if has already active session
+		if (cookies != null) {
+			UI.printUI("Session active, skip loggin: " + selectedUserAccount);
+			driver.get("https://signin.ebay.com/ws/eBayISAPI.dll?SignIn");
+
+			for (Cookie cookie : cookies) {
+				driver.manage().addCookie(cookie);
+			}
+
+			UI.printUI("session copied to browser, cookies: " + cookies.size());
+			driver.get("http://www.ebay.com/itm/Dual-GPS-BT-Receiver-XGPS150-IPAD-IPHONE-IPOD-etc-/150814042955?pt=GPS_Devices");
+
+		} else {
+			driver.get("https://signin.ebay.com/ws/eBayISAPI.dll?SignIn");
+
+			UI.printUI("Log in with: " + selectedUserAccount);
+
+			SendPrivateMessage.setInstantKeys(driver, "userid",
+					selectedUserAccount.getKey());
+			SendPrivateMessage.setInstantKeys(driver, "pass",
+					selectedUserAccount.getValue());
+
+			// remember me
+			if (!driver.findElement(By.id("signed_in")).isSelected())
+				driver.findElement(By.id("signed_in")).click();
+
+			WebElement element = driver.findElement(By.id("userid"));
+			element.submit();
+		}
+
+		return driver;
+	}
+
 	public static List<Item> loadItemsFromEbay(String keyword,
 			List<Integer> categories) {
 
@@ -70,9 +110,9 @@ public class Network {
 				String.valueOf(Config.resultCount));
 		uBuilder.addParameter("SERVICE-VERSION", "1.12.0");
 
-		//v4 - sort by date
+		// v4 - sort by date
 		uBuilder.addParameter("sortOrder", "EndTimeSoonest");
-		
+
 		// Specifies the category from which you want to retrieve item listings.
 		// This field can be repeated to include multiple categories. Up to
 		// three (3) categories can be specified.

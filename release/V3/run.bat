@@ -1,1 +1,0 @@
-java -jar bot_core.jar
