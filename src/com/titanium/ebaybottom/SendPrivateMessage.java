@@ -22,7 +22,9 @@ import com.titanium.ebaybottom.util.TextIO;
 import com.titanium.ebaybottom.util.UI;
 
 public class SendPrivateMessage {
-	// private static final int TIMEOUT_BETWEEN_OPEN_PM_WINDOW = 10;
+	private static final String CAPTCHA_ID = "tokenText";
+	private static final String PRIVATEMESSAGE_TITLE_ID = "qusetOther_cnt_cnt";
+	private static final String PRIVATEMESSAGE_BODY_ID = "msg_cnt_cnt";
 	public static List<Item> items = new ArrayList<>();
 	public static List<KeyValuePair> messages = new ArrayList<>();
 
@@ -33,17 +35,14 @@ public class SendPrivateMessage {
 	}
 
 	public static void sendMessagesInQueue(KeyValuePair selectedUserAccount) {
-		UI.printUI("Starting private message sending setup...");
 
-		// WebDriver driver = new FirefoxDriver();
-		// driver.get("https://signin.ebay.com/ws/eBayISAPI.dll?SignIn");
+		UI.printUI("Starting private message sending setup...");
 		WebDriver driver = Network.logIn(selectedUserAccount);
 
 		for (int i = 0; i < items.size(); i++) {
 
 			Item selectedItem = items.get(i);
 			KeyValuePair selectedMessage = messages.get(i);
-
 			if (!driver.getCurrentUrl().contains(
 					"contact.ebay.com/ws/eBayISAPI.dll?")) {
 				driver.get(composeMessageUrl(selectedItem));
@@ -71,14 +70,6 @@ public class SendPrivateMessage {
 			// style="width:109px;height:33px">
 			findElementById(driver, "continueBtnDiv").submit();
 
-			// test- instant text enter
-			// JavascriptExecutor js = (JavascriptExecutor) driver;
-			// js.executeScript("document.getElementById('qusetOther_cnt_cnt').value = \""
-			// + selectedMessage.getKey() + "\";");
-
-			setInstantKeys(driver, "qusetOther_cnt_cnt",
-					selectedMessage.getKey());
-
 			// title
 			// <input id="qusetOther_cnt_cnt" class="gryFnt" type="text"
 			// name="qusetOther_cnt_cnt" size="50" maxlength="32" value=""
@@ -87,7 +78,11 @@ public class SendPrivateMessage {
 			// findElementById(driver, "qusetOther_cnt_cnt").sendKeys(
 			// selectedMessage.getKey());
 
-			setInstantKeys(driver, "msg_cnt_cnt", selectedMessage.getValue());
+			if (findElementById(driver, PRIVATEMESSAGE_TITLE_ID) != null) {
+				setInstantKeys(driver, PRIVATEMESSAGE_TITLE_ID,
+						selectedMessage.getKey());
+				findElementById(driver, PRIVATEMESSAGE_TITLE_ID).click();
+			}
 
 			// message
 			// <textarea id="msg_cnt_cnt" class="gryFnt"
@@ -96,10 +91,23 @@ public class SendPrivateMessage {
 			// if (findElementById(driver, "msg_cnt_cnt") != null)
 			// findElementById(driver, "msg_cnt_cnt").sendKeys(
 			// selectedMessage.getValue());
+			if (findElementById(driver, PRIVATEMESSAGE_BODY_ID) != null) {
+				setInstantKeys(driver, PRIVATEMESSAGE_BODY_ID,
+						selectedMessage.getValue());
+				findElementById(driver, PRIVATEMESSAGE_BODY_ID).click();
+			}
 
-			if (findElementById(driver, "tokenText") != null)
-				findElementById(driver, "tokenText").click();
-			// TODO: highlight captcha
+			// captcha highlight
+			if (findElementById(driver, CAPTCHA_ID) != null) {
+				findElementById(driver, CAPTCHA_ID).click();
+
+				// onresume website highlight captcha HACK
+				JavascriptExecutor js2 = (JavascriptExecutor) driver;
+				String onFocusFocus = "var s = document.createElement('script'); s.type = 'text/javascript'; "
+						+ "var code = 'window.onfocus = function () {document.getElementById(\"tokenText\").focus();}';"
+						+ "try {s.appendChild(document.createTextNode(code)); document.body.appendChild(s); } catch (e) {s.text = code; document.body.appendChild(s);}";
+				js2.executeScript(onFocusFocus);
+			}
 		}
 
 		SessionCache.Write(selectedUserAccount, driver.manage().getCookies());
@@ -109,15 +117,13 @@ public class SendPrivateMessage {
 
 	public static void setInstantKeys(WebDriver driver, String id,
 			String selectedMessage) {
-
 		try {
 			JavascriptExecutor js2 = (JavascriptExecutor) driver;
 			js2.executeScript(String.format(
 					"document.getElementById(\"%s\").value = \"%s\"", id,
 					StringEscapeUtils.escapeJava(selectedMessage)));
 		} catch (Exception e) {
-			UI.printError(e.toString());
-			// e.printStackTrace();
+			UI.printDebug(e);
 		}
 
 	}
