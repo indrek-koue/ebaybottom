@@ -1,10 +1,4 @@
 ApiKey.java
-
-*.class
-
-# Package Files #
-*.jar
-*.war
-*.ear
-
 release_bin
+bin
+gen
