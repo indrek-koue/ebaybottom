@@ -16,6 +16,9 @@ import com.titanium.ebaybottom.model.KeyValuePair;
 
 public class Config {
 
+	public static final int MODE_NORMAL = 0;
+	public static final int MODE_GROUPS = 1;
+
 	// BotMain
 	public static int minPrice;
 	public static int maxPrice;
@@ -23,6 +26,7 @@ public class Config {
 	public static int feedbackLimit;
 	public static String locale;
 	public static int windowOpenTimeout;
+	public static int appMode;
 
 	// csvlists
 	public static List<KeyValuePair> users;
@@ -58,7 +62,8 @@ public class Config {
 			windowOpenTimeout = Integer.parseInt(main
 					.get("TIMEOUT_BETWEEN_OPEN_PM_WINDOW"));
 			personalMessageHeader = main.get("PERSONAL_MESSAGE_HEADER");
-			
+			appMode = Integer.parseInt(main.get("APP_MODE"));
+
 			Section lists = ini.get("CSVLists");
 			users = parseKeyValueList(lists.get("USERS"));
 			keywords = Arrays.asList(lists.get("KEYWORDS").split(","));
@@ -68,7 +73,6 @@ public class Config {
 			messagesToUsers = parseKeyValueList(lists.get("MESSAGESTOUSERS"));
 			blackListedUsers = Arrays.asList(lists.get("BLACKLISTEDUSERS")
 					.split(","));
-			
 
 			isDebugLogging = ini.get("Dev").get("DEBUG", Boolean.class);
 		} catch (Exception e) {

@@ -32,6 +32,7 @@ import org.openqa.selenium.WebDriver;
 import com.google.gson.Gson;
 import com.titanium.ebaybottom.model.EbaySearchResult;
 import com.titanium.ebaybottom.model.FindItemsAdvancedResponse;
+import com.titanium.ebaybottom.model.Group;
 import com.titanium.ebaybottom.model.Item;
 import com.titanium.ebaybottom.model.SearchResult;
 import com.titanium.ebaybottom.model.KeyValuePair;
@@ -44,6 +45,7 @@ public class Main {
 
 	public static final String CONFIG_FILE = "config.ini";
 	public static final String HISTORY_FILE = "history.txt";
+	public static final String GROUP_FILE = "groups.txt";
 	private static final int APP_VERSION = 7;
 
 	public static final boolean isDebug = true;
@@ -64,25 +66,41 @@ public class Main {
 		UI.printUI("Version: " + APP_VERSION);
 
 		while (true) {
-			// 1. User account selection
-			UI.printListWithIndexNumbers(Config.users);
-			KeyValuePair selectedUserAccount = Config.users.get(isDebug ? 0
-					: UI.getUserInputInt(UI.LINE_NUMBER_TO_SELECT));
 
-			// 2. Search keyword selection
-			UI.printListWithIndexNumbers(Config.keywords);
-			String selectedKeyword = Config.keywords.get(isDebug ? 0 : UI
-					.getUserInputInt(UI.LINE_NUMBER_TO_SELECT));
+			Group selectedGroup = null;
 
-			// 3. Category group selection
-			UI.printListWithIndexNumbers(Config.categories);
-			List<Integer> selectedCategoryGroup = Config.categories
-					.get(isDebug ? 0 : UI
-							.getUserInputInt(UI.LINE_NUMBER_TO_SELECT));
+			if (Config.appMode == Config.MODE_GROUPS) {
+
+				// load saved groups
+				List<Group> groups = GroupsMode.load();
+				UI.printListWithIndexNumbers(groups);
+				selectedGroup = groups.get(UI
+						.getUserInputInt(UI.LINE_NUMBER_TO_SELECT));
+			} else {
+				// 1. User account selection
+				UI.printListWithIndexNumbers(Config.users);
+				KeyValuePair selectedUserAccount = Config.users.get(isDebug ? 0
+						: UI.getUserInputInt(UI.LINE_NUMBER_TO_SELECT));
+
+				// 2. Search keyword selection
+				UI.printListWithIndexNumbers(Config.keywords);
+				String selectedKeyword = Config.keywords.get(isDebug ? 0 : UI
+						.getUserInputInt(UI.LINE_NUMBER_TO_SELECT));
+
+				// 3. Category group selection
+				UI.printListWithIndexNumbers(Config.categories);
+				List<Integer> selectedCategoryGroup = Config.categories
+						.get(isDebug ? 0 : UI
+								.getUserInputInt(UI.LINE_NUMBER_TO_SELECT));
+
+				selectedGroup = new Group(selectedUserAccount, selectedKeyword,
+						selectedCategoryGroup, Config.minPrice, Config.maxPrice);
+			}
 
 			// 4. Load & filter
-			List<Item> returnedItems = Network.loadFromEbay(selectedKeyword,
-					selectedCategoryGroup);
+			List<Item> returnedItems = Network.loadFromEbay(
+					selectedGroup.selectedKeyword,
+					selectedGroup.selectedCategoryGroup);
 			List<Item> filteredItems = ResultController
 					.removeInvalid(returnedItems);
 
@@ -92,7 +110,8 @@ public class Main {
 
 			// 6. Select & send messages
 			UI.selectItemsAndMessages(filteredItems, selectedItemsRowNumbers);
-			SendPrivateMessage.sendMessagesInQueue(selectedUserAccount);
+			SendPrivateMessage
+					.sendMessagesInQueue(selectedGroup.selectedUserAccount);
 
 			// 7. Confirm and write to history
 			if (UI.getUserInput("Was message sending success (y/n) ? ").trim()
@@ -105,6 +124,11 @@ public class Main {
 				UI.printUI("history cleared");
 			}
 
+			// 8. save search group
+			if (Config.appMode == Config.MODE_NORMAL)
+				GroupsMode.askForSave(selectedGroup);
+
+			// 9. cleanup
 			UI.printUI("Clearing messages from memory for new cycle");
 			SendPrivateMessage.items.clear();
 			SendPrivateMessage.messages.clear();
