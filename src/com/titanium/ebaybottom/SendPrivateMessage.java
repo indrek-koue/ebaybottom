@@ -27,6 +27,7 @@ public class SendPrivateMessage {
 	private static final String PRIVATEMESSAGE_BODY_ID = "msg_cnt_cnt";
 	public static List<Item> items = new ArrayList<>();
 	public static List<KeyValuePair> messages = new ArrayList<>();
+	private static WebDriver driver;
 
 	public static void addToMessageQue(Item selectedItem, KeyValuePair msg) {
 		UI.printDebug("MSG QUEUE ADD:" + selectedItem.toString() + " " + msg);
@@ -37,7 +38,9 @@ public class SendPrivateMessage {
 	public static void sendMessagesInQueue(KeyValuePair selectedUserAccount) {
 
 		UI.printUI("Starting private message sending setup...");
-		WebDriver driver = Network.logIn(selectedUserAccount);
+
+		if (driver == null)
+			driver = Network.logIn(selectedUserAccount);
 
 		for (int i = 0; i < items.size(); i++) {
 
@@ -48,13 +51,11 @@ public class SendPrivateMessage {
 				driver.get(composeMessageUrl(selectedItem));
 			} else {
 				new WebWindow(driver, composeMessageUrl(selectedItem));
-				// new WebDriverWait(driver, Config.windowOpenTimeout*1000);
 			}
 
 			try {
 				Thread.sleep(Config.windowOpenTimeout * 1000);
 			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 
@@ -111,7 +112,9 @@ public class SendPrivateMessage {
 		}
 
 		SessionCache.Write(selectedUserAccount, driver.manage().getCookies());
-
+		items.clear();
+		messages.clear();
+		
 		UI.printUI("Message sending setup finished");
 	}
 

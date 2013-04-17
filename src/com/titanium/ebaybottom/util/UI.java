@@ -56,6 +56,8 @@ public class UI {
 
 	public static void selectUserPrivateMessages(List<Item> returnedItems) {
 
+		UI.printListWithIndexNumbers(returnedItems);
+
 		String itemNumbers = Main.isDebug ? "1,2,3"
 				: UI.getUserInput("Enter sequence numbers of items you wish message to separated with ,  Example: 1,5,6,7,21");
 
@@ -88,19 +90,5 @@ public class UI {
 			}
 			SendPrivateMessage.addToMessageQue(selectedItem, msg);
 		}
-
-		// for (String string : itemNums) {
-		// Item selectedItem = returnedItems.get(Integer.parseInt(string));
-		// UI.printUI("Select message for item: "
-		// + selectedItem.getTitle().get(0));
-		//
-		// UI.printListWithIndexNumbers(Config.messagesToUsers);
-		//
-		// KeyValuePair msg = Config.messagesToUsers.get(UI
-		// .getUserInputInt(UI.LINE_NUMBER_TO_SELECT));
-		//
-		// SendPrivateMessage.addToMessageQue(selectedItem, msg);
-		//
-		// }
 	}
 }

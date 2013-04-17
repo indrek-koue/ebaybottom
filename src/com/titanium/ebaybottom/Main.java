@@ -46,7 +46,7 @@ public class Main {
 	public static final String HISTORY_FILE = "history.txt";
 	private static final int APP_VERSION = 5;
 
-	public static boolean isDebug = false;
+	public static final boolean isDebug = true;
 
 	// superdealsyysi#Stupid123456
 	public static void main(String[] args) throws IOException {
@@ -81,15 +81,12 @@ public class Main {
 							.getUserInputInt(UI.LINE_NUMBER_TO_SELECT));
 
 			// 4. Load filtered items from ebay
-			List<Item> returnedItems = Network.loadItemsFromEbay(
+			List<Item> returnedItems = Network.loadFilteredItemsFromEbay(
 					selectedKeyword, selectedCategoryGroup);
-			List<Item> invalidRemoved = ResultController
-					.removeInvalid(returnedItems);
 
-			UI.printListWithIndexNumbers(invalidRemoved);
-
-			// 5. Select messages to send
-			UI.selectUserPrivateMessages(invalidRemoved);
+			// 5. Print and let user to select messages to send
+			UI.selectUserPrivateMessages(ResultController
+					.removeInvalid(returnedItems));
 
 			// 6. Send messages
 			SendPrivateMessage.sendMessagesInQueue(selectedUserAccount);
@@ -106,6 +103,5 @@ public class Main {
 			}
 			UI.printUI("Cycle done: Re-start");
 		}
-		// UI.printUI("DONE!");
 	}
 }
