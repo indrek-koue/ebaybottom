@@ -44,9 +44,9 @@ public class Main {
 
 	public static final String CONFIG_FILE = "config.ini";
 	public static final String HISTORY_FILE = "history.txt";
-	private static final int APP_VERSION = 5;
+	private static final int APP_VERSION = 7;
 
-	public static final boolean isDebug = true;
+	public static final boolean isDebug = false;
 
 	// superdealsyysi#Stupid123456
 	public static void main(String[] args) throws IOException {
@@ -80,15 +80,18 @@ public class Main {
 					.get(isDebug ? 0 : UI
 							.getUserInputInt(UI.LINE_NUMBER_TO_SELECT));
 
-			// 4. Load filtered items from ebay
-			List<Item> returnedItems = Network.loadFilteredItemsFromEbay(
-					selectedKeyword, selectedCategoryGroup);
+			// 4. Load & filter
+			List<Item> returnedItems = Network.loadFromEbay(selectedKeyword,
+					selectedCategoryGroup);
+			List<Item> filteredItems = ResultController
+					.removeInvalid(returnedItems);
 
-			// 5. Print and let user to select messages to send
-			UI.selectUserPrivateMessages(ResultController
-					.removeInvalid(returnedItems));
+			// 5. Print and choose items
+			UI.printListWithIndexNumbers(filteredItems);
+			List<String> selectedItemsRowNumbers = UI.getUserInputAndParse();
 
-			// 6. Send messages
+			// 6. Select & send messages
+			UI.selectItemsAndMessages(filteredItems, selectedItemsRowNumbers);
 			SendPrivateMessage.sendMessagesInQueue(selectedUserAccount);
 
 			// 7. Confirm and write to history
@@ -101,6 +104,11 @@ public class Main {
 			} else {
 				UI.printUI("history cleared");
 			}
+
+			UI.printUI("Clearing messages from memory for new cycle");
+			SendPrivateMessage.items.clear();
+			SendPrivateMessage.messages.clear();
+
 			UI.printUI("Cycle done: Re-start");
 		}
 	}

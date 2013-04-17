@@ -112,9 +112,6 @@ public class SendPrivateMessage {
 		}
 
 		SessionCache.Write(selectedUserAccount, driver.manage().getCookies());
-		items.clear();
-		messages.clear();
-		
 		UI.printUI("Message sending setup finished");
 	}
 

@@ -68,7 +68,7 @@ public class Network {
 		return driver;
 	}
 
-	public static List<Item> loadFilteredItemsFromEbay(String keyword,
+	public static List<Item> loadFromEbay(String keyword,
 			List<Integer> categories) {
 
 		String returnJson = "";

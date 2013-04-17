@@ -1,6 +1,7 @@
 package com.titanium.ebaybottom.util;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import com.titanium.ebaybottom.Main;
@@ -54,33 +55,29 @@ public class UI {
 		System.out.println();
 	}
 
-	public static void selectUserPrivateMessages(List<Item> returnedItems) {
+	public static void selectItemsAndMessages(List<Item> returnedItems,
+			List<String> selectedItemsRowNumbers) {
 
-		UI.printListWithIndexNumbers(returnedItems);
-
-		String itemNumbers = Main.isDebug ? "1,2,3"
-				: UI.getUserInput("Enter sequence numbers of items you wish message to separated with ,  Example: 1,5,6,7,21");
-
-		String[] itemNums = itemNumbers.split(",");
-
-		UI.printUI("You want to send message to " + itemNums.length
-				+ " items\n");
+		UI.printUI("You want to send message to "
+				+ selectedItemsRowNumbers.size() + " items\n");
 
 		if (Config.messagesToUsers.size() == 0) {
-			UI.printError("you have to enter messages to users in config.ini file");
+			UI.printError("you have to 0"
+					+ "enter messages to users in config.ini file");
 			return;
 		}
 
-		// v3
+		// v3 - the same message goes to all participants
 		boolean isFirstRun = true;
 		KeyValuePair msg = null;
 
-		for (String string : itemNums) {
+		for (String string : selectedItemsRowNumbers) {
 			Item selectedItem = returnedItems.get(Integer.parseInt(string));
 
 			if (isFirstRun) {
-				UI.printUI("Select message for item: "
-						+ selectedItem.getTitle().get(0));
+				UI.printUI("Select messages for items");
+						
+						//+ selectedItem.getTitle().get(0));
 
 				UI.printListWithIndexNumbers(Config.messagesToUsers);
 
@@ -90,5 +87,31 @@ public class UI {
 			}
 			SendPrivateMessage.addToMessageQue(selectedItem, msg);
 		}
+	}
+
+	public static List<String> getUserInputAndParse() {
+
+		List<String> selectedItems = new ArrayList<>();
+
+		String itemNumbersRaw = Main.isDebug ? "1,2,3"
+				: UI.getUserInput("Enter sequence numbers of items you wish message to "
+						+ "separated with , or with - . Example: 1,5,6,7,21 or 1-21");
+
+		if (itemNumbersRaw.contains("-")) {// we have a range
+
+			String[] nums = itemNumbersRaw.split("-");
+
+			int start = Integer.parseInt(nums[0]);
+			int end = Integer.parseInt(nums[1]);
+
+			for (int i = start; i <= end; i++)
+				selectedItems.add(Integer.toString(i));
+
+		} else {
+			String[] temp = itemNumbersRaw.split(",");
+			selectedItems = Arrays.asList(temp);
+		}
+
+		return selectedItems;
 	}
 }
