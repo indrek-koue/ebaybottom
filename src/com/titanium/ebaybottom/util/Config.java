@@ -33,6 +33,7 @@ public class Config {
 
 	// dev
 	public static boolean isDebugLogging;
+	public static String personalMessageHeader;
 
 	public static boolean load(String path) {
 		try {
@@ -56,7 +57,8 @@ public class Config {
 			locale = main.get("LOCALE");
 			windowOpenTimeout = Integer.parseInt(main
 					.get("TIMEOUT_BETWEEN_OPEN_PM_WINDOW"));
-
+			personalMessageHeader = main.get("PERSONAL_MESSAGE_HEADER");
+			
 			Section lists = ini.get("CSVLists");
 			users = parseKeyValueList(lists.get("USERS"));
 			keywords = Arrays.asList(lists.get("KEYWORDS").split(","));
@@ -66,6 +68,7 @@ public class Config {
 			messagesToUsers = parseKeyValueList(lists.get("MESSAGESTOUSERS"));
 			blackListedUsers = Arrays.asList(lists.get("BLACKLISTEDUSERS")
 					.split(","));
+			
 
 			isDebugLogging = ini.get("Dev").get("DEBUG", Boolean.class);
 		} catch (Exception e) {

@@ -108,6 +108,40 @@ public class SendPrivateMessage {
 						+ "var code = 'window.onfocus = function () {document.getElementById(\"tokenText\").focus();}';"
 						+ "try {s.appendChild(document.createTextNode(code)); document.body.appendChild(s); } catch (e) {s.text = code; document.body.appendChild(s);}";
 				js2.executeScript(onFocusFocus);
+			} else {
+				// captcha is used to determine if we are able to send messages
+				// or not, if captcha doesn't exist, then message sending is not
+				// allowed and we have to redirect user to send personal message
+				// page
+
+				String urlBase = "http://contact.ebay.com/ws/eBayISAPI.dll?ContactUserNextGen&recipient=";
+
+				String username = selectedItem.getSellerInfo().get(0)
+						.getSellerUserName().get(0);
+
+				driver.get(urlBase + username);
+
+				String msg = Config.personalMessageHeader + " Nr. "
+						+ selectedItem.getItemId().get(0) + " "
+						+ selectedItem.getTitle().get(0) + ".\n\n"
+						+ selectedMessage.getValue();
+
+				if (findElementById(driver, PRIVATEMESSAGE_BODY_ID) != null) {
+					setInstantKeys(driver, PRIVATEMESSAGE_BODY_ID, msg);
+					findElementById(driver, PRIVATEMESSAGE_BODY_ID).click();
+				}
+
+				// captcha highlight
+				if (findElementById(driver, CAPTCHA_ID) != null) {
+					findElementById(driver, CAPTCHA_ID).click();
+
+					// onresume website highlight captcha HACK
+					JavascriptExecutor js2 = (JavascriptExecutor) driver;
+					String onFocusFocus = "var s = document.createElement('script'); s.type = 'text/javascript'; "
+							+ "var code = 'window.onfocus = function () {document.getElementById(\"tokenText\").focus();}';"
+							+ "try {s.appendChild(document.createTextNode(code)); document.body.appendChild(s); } catch (e) {s.text = code; document.body.appendChild(s);}";
+					js2.executeScript(onFocusFocus);
+				}
 			}
 		}
 

@@ -46,7 +46,7 @@ public class Main {
 	public static final String HISTORY_FILE = "history.txt";
 	private static final int APP_VERSION = 7;
 
-	public static final boolean isDebug = false;
+	public static final boolean isDebug = true;
 
 	// superdealsyysi#Stupid123456
 	public static void main(String[] args) throws IOException {
