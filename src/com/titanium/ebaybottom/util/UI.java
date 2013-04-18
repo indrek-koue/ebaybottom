@@ -35,8 +35,8 @@ public class UI {
 		return input;
 	}
 
-	public static int getUserInputInt(String header) {
-		System.out.print("\n++ " + header);
+	public static int getUserInputInt() {
+		System.out.print("\n++ " + LINE_NUMBER_TO_SELECT);
 		return TextIO.getInt();
 	}
 
@@ -82,7 +82,7 @@ public class UI {
 				UI.printListWithIndexNumbers(Config.messagesToUsers);
 
 				msg = Config.messagesToUsers.get(Main.isDebug ? 0 : UI
-						.getUserInputInt(UI.LINE_NUMBER_TO_SELECT));
+						.getUserInputInt());
 				isFirstRun = false;
 			}
 			SendPrivateMessage.addToMessageQue(selectedItem, msg);

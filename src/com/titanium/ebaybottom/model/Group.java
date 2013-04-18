@@ -7,17 +7,17 @@ import java.util.List;
 public class Group {
 
 	private static final String EMPTY_USER = "###:###";
-	public KeyValuePair selectedUserAccount;
-	public String selectedKeyword;
-	public List<Integer> selectedCategoryGroup;
+	public KeyValuePair userAccount;
+	public String keyword;
+	public List<Integer> categoryGroup = new ArrayList<Integer>();
 	public int minPrice;
 	public int maxPrice;
-
+	
 	public Group(KeyValuePair selectedUserAccount, String selectedKeyword,
 			List<Integer> selectedCategoryGroup, int minPrice, int maxPrice) {
-		this.selectedUserAccount = selectedUserAccount;
-		this.selectedKeyword = selectedKeyword;
-		this.selectedCategoryGroup = selectedCategoryGroup;
+		this.userAccount = selectedUserAccount;
+		this.keyword = selectedKeyword;
+		this.categoryGroup = selectedCategoryGroup;
 		this.minPrice = minPrice;
 		this.maxPrice = maxPrice;
 	}
@@ -27,19 +27,25 @@ public class Group {
 		this(null, selectedKeyword, selectedCategoryGroup, minPrice, maxPrice);
 	}
 
-	public Group(String[] columns) {
-		// TODO Auto-generated constructor stub
+	public Group(String row) {
 
-		if (!columns[0].equals(EMPTY_USER))
-			selectedUserAccount = new KeyValuePair(columns[0].split(":")[0],
-					columns[0].split(":")[1]);
+		String[] columns = row.split("\\|");
+		if (!columns[0].equals(EMPTY_USER)) {
+			String username = columns[0].split(":")[0];
+			String password = columns[0].split(":")[1];
+			userAccount = new KeyValuePair(username, password);
+		} else {
+			userAccount = null;
+		}
 
-		selectedKeyword = columns[1];
+		keyword = columns[1];
 
 		String[] gategories = columns[2].split(",");
-		selectedCategoryGroup = new ArrayList<Integer>();
-		for (int i = 0; i < gategories.length; i++)
-			selectedCategoryGroup.add(Integer.parseInt(gategories[i]));
+		for (int i = 0; i < gategories.length; i++) {
+			String rawString = gategories[i].replace("[", "").replace("]", "")
+					.trim();
+			categoryGroup.add(Integer.parseInt(rawString));
+		}
 
 		minPrice = Integer.parseInt(columns[3]);
 		maxPrice = Integer.parseInt(columns[4]);
@@ -50,9 +56,9 @@ public class Group {
 		// TODO Auto-generated method stub
 		return String.format(
 				"%s|%s|%s|%s|%s|",
-				selectedUserAccount == null ? EMPTY_USER : selectedUserAccount
-						.toString(), selectedKeyword, Arrays
-						.toString(selectedCategoryGroup.toArray()), minPrice,
+				userAccount == null ? EMPTY_USER : userAccount
+						.toString(), keyword, Arrays
+						.toString(categoryGroup.toArray()), minPrice,
 				maxPrice);
 	}
 

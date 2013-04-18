@@ -48,7 +48,7 @@ public class Main {
 	public static final String GROUP_FILE = "groups.txt";
 	private static final int APP_VERSION = 7;
 
-	public static final boolean isDebug = true;
+	public static final boolean isDebug = false;
 
 	// superdealsyysi#Stupid123456
 	public static void main(String[] args) throws IOException {
@@ -67,40 +67,40 @@ public class Main {
 
 		while (true) {
 
-			Group selectedGroup = null;
+			Group group = null;
 
 			if (Config.appMode == Config.MODE_GROUPS) {
-
+				UI.printUI("MODE: GROUPS");
+				
 				// load saved groups
 				List<Group> groups = GroupsMode.load();
+				if (groups == null || groups.size() == 0) {
+					UI.printError("no groups exist in " + GROUP_FILE);
+					return;
+				}
+
 				UI.printListWithIndexNumbers(groups);
-				selectedGroup = groups.get(UI
-						.getUserInputInt(UI.LINE_NUMBER_TO_SELECT));
+				group = groups.get(UI.getUserInputInt());
+
+				if (group.userAccount == null)
+					group.userAccount = selectUserAccount();
+
 			} else {
 				// 1. User account selection
-				UI.printListWithIndexNumbers(Config.users);
-				KeyValuePair selectedUserAccount = Config.users.get(isDebug ? 0
-						: UI.getUserInputInt(UI.LINE_NUMBER_TO_SELECT));
+				KeyValuePair selectedUserAccount = selectUserAccount();
 
 				// 2. Search keyword selection
-				UI.printListWithIndexNumbers(Config.keywords);
-				String selectedKeyword = Config.keywords.get(isDebug ? 0 : UI
-						.getUserInputInt(UI.LINE_NUMBER_TO_SELECT));
+				String selectedKeyword = selectKeyword();
 
-				// 3. Category group selection
-				UI.printListWithIndexNumbers(Config.categories);
-				List<Integer> selectedCategoryGroup = Config.categories
-						.get(isDebug ? 0 : UI
-								.getUserInputInt(UI.LINE_NUMBER_TO_SELECT));
+				// 3. Categories selection
+				List<Integer> selectedCategoryGroup = selectCategoryGroup();
 
-				selectedGroup = new Group(selectedUserAccount, selectedKeyword,
+				group = new Group(selectedUserAccount, selectedKeyword,
 						selectedCategoryGroup, Config.minPrice, Config.maxPrice);
 			}
 
 			// 4. Load & filter
-			List<Item> returnedItems = Network.loadFromEbay(
-					selectedGroup.selectedKeyword,
-					selectedGroup.selectedCategoryGroup);
+			List<Item> returnedItems = Network.loadFromEbay(group);
 			List<Item> filteredItems = ResultController
 					.removeInvalid(returnedItems);
 
@@ -110,8 +110,7 @@ public class Main {
 
 			// 6. Select & send messages
 			UI.selectItemsAndMessages(filteredItems, selectedItemsRowNumbers);
-			SendPrivateMessage
-					.sendMessagesInQueue(selectedGroup.selectedUserAccount);
+			SendPrivateMessage.sendMessagesInQueue(group.userAccount);
 
 			// 7. Confirm and write to history
 			if (UI.getUserInput("Was message sending success (y/n) ? ").trim()
@@ -126,7 +125,7 @@ public class Main {
 
 			// 8. save search group
 			if (Config.appMode == Config.MODE_NORMAL)
-				GroupsMode.askForSave(selectedGroup);
+				GroupsMode.askForSave(group);
 
 			// 9. cleanup
 			UI.printUI("Clearing messages from memory for new cycle");
@@ -135,5 +134,26 @@ public class Main {
 
 			UI.printUI("Cycle done: Re-start");
 		}
+	}
+
+	private static List<Integer> selectCategoryGroup() {
+		UI.printListWithIndexNumbers(Config.categories);
+		List<Integer> selectedCategoryGroup = Config.categories.get(isDebug ? 0
+				: UI.getUserInputInt());
+		return selectedCategoryGroup;
+	}
+
+	private static String selectKeyword() {
+		UI.printListWithIndexNumbers(Config.keywords);
+		String selectedKeyword = Config.keywords.get(isDebug ? 0 : UI
+				.getUserInputInt());
+		return selectedKeyword;
+	}
+
+	private static KeyValuePair selectUserAccount() {
+		UI.printListWithIndexNumbers(Config.users);
+		KeyValuePair selectedUserAccount = Config.users.get(isDebug ? 0 : UI
+				.getUserInputInt());
+		return selectedUserAccount;
 	}
 }

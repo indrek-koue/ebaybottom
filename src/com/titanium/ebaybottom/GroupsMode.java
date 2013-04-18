@@ -19,8 +19,10 @@ public class GroupsMode {
 	public static void save(Group g) {
 
 		try {
-			FileUtils.writeStringToFile(new File(Main.GROUP_FILE),
-					g.toString(), true);
+			UI.printDebug("write to groups mode: " + g);
+
+			FileUtils.writeStringToFile(new File(Main.GROUP_FILE), g.toString()
+					+ "\n", true);
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -41,7 +43,7 @@ public class GroupsMode {
 			List<String> rows = FileUtils.readLines(f);
 
 			for (String row : rows)
-				result.add(new Group(row.split("\\|")));
+				result.add(new Group(row));
 
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
@@ -54,18 +56,21 @@ public class GroupsMode {
 	public static void askForSave(Group g) {
 
 		String userResponse = UI
-				.getUserInput("Save to groups mode for later use (y/x/n)? "
-						+ "y = yes; x=yes with user ; n = no");
+				.getUserInput(
+						"Save to groups mode for later use (y/x/n)? "
+								+ "y = yes; x=yes with user; n = no")
+				.toLowerCase().trim();
 
 		if (userResponse.equals("y")) {
+			// remove user account
+			g.userAccount = null;
 			GroupsMode.save(g);
 			UI.printUI("Group saved without user!");
 		} else if (userResponse.equals("x")) {
-			UI.printUI("Group saved with user!");
 			GroupsMode.save(g);
+			UI.printUI("Group saved with user!");
 		} else {
 			UI.printUI("Group not saved");
 		}
 	}
-
 }

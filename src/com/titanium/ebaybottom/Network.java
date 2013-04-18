@@ -21,6 +21,7 @@ import org.openqa.selenium.support.ui.WebDriverWait;
 import com.google.gson.Gson;
 import com.titanium.ebaybottom.model.EbaySearchResult;
 import com.titanium.ebaybottom.model.FindItemsAdvancedResponse;
+import com.titanium.ebaybottom.model.Group;
 import com.titanium.ebaybottom.model.Item;
 import com.titanium.ebaybottom.model.KeyValuePair;
 import com.titanium.ebaybottom.swebdriver.WebWindow;
@@ -44,8 +45,9 @@ public class Network {
 				driver.manage().addCookie(cookie);
 			}
 
-			UI.printUI("session copied to browser, cookies: " + cachedCookies.size());
-//			driver.get("http://www.ebay.com/itm/Dual-GPS-BT-Receiver-XGPS150-IPAD-IPHONE-IPOD-etc-/150814042955?pt=GPS_Devices");
+			UI.printUI("session copied to browser, cookies: "
+					+ cachedCookies.size());
+			// driver.get("http://www.ebay.com/itm/Dual-GPS-BT-Receiver-XGPS150-IPAD-IPHONE-IPOD-etc-/150814042955?pt=GPS_Devices");
 
 		} else {
 			driver.get("https://signin.ebay.com/ws/eBayISAPI.dll?SignIn");
@@ -68,13 +70,13 @@ public class Network {
 		return driver;
 	}
 
-	public static List<Item> loadFromEbay(String keyword,
-			List<Integer> categories) {
+	public static List<Item> loadFromEbay(Group group) {
 
 		String returnJson = "";
 		try {
 			HttpResponse response = new DefaultHttpClient()
-					.execute(new HttpGet(buildUri(keyword, categories)));
+					.execute(new HttpGet(buildUri(group.keyword,
+							group.categoryGroup)));
 
 			String json = EntityUtils.toString(response.getEntity());
 
