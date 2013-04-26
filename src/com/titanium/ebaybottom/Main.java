@@ -48,91 +48,101 @@ public class Main {
 	public static final String GROUP_FILE = "groups.txt";
 	private static final int APP_VERSION = 7;
 
-	public static final boolean isDebug = false;
+	public static final boolean isDebug = true;
 
 	// superdealsyysi#Stupid123456
-	public static void main(String[] args) throws IOException {
+	public static void main(String[] args) {
 
-		// load config file
-		if (!Config.load(new File(".").getCanonicalPath() + "\\" + CONFIG_FILE)) {
-			UI.printError("loading values from config file failed @ "
-					+ CONFIG_FILE);
-			return;
-		} else {
-			UI.printUI("config load success:\n");
-			Config.print();
-		}
+		try {
+			// load config file
+			if (!Config.load(new File(".").getCanonicalPath() + "\\"
+					+ CONFIG_FILE)) {
+				UI.printError("loading values from config file failed @ "
+						+ CONFIG_FILE);
+				return;
+			} else {
+				UI.printUI("config load success:\n");
+				Config.print();
+			}
 
-		UI.printUI("Version: " + APP_VERSION);
+			UI.printUI("Version: " + APP_VERSION);
 
-		while (true) {
+			while (true) {
 
-			Group group = null;
+				Group group = null;
 
-			if (Config.appMode == Config.MODE_GROUPS) {
-				UI.printUI("MODE: GROUPS");
-				
-				// load saved groups
-				List<Group> groups = GroupsMode.load();
-				if (groups == null || groups.size() == 0) {
-					UI.printError("no groups exist in " + GROUP_FILE);
-					return;
+				if (Config.appMode == Config.MODE_GROUPS) {
+					UI.printUI("MODE: GROUPS");
+
+					// load saved groups
+					List<Group> groups = GroupsMode.load();
+					if (groups == null || groups.size() == 0) {
+						UI.printError("no groups exist in " + GROUP_FILE);
+						return;
+					}
+
+					UI.printListWithIndexNumbers(groups);
+					group = groups.get(UI.getUserInputInt());
+
+					if (group.userAccount == null)
+						group.userAccount = selectUserAccount();
+
+				} else {
+					// 1. User account selection
+					KeyValuePair selectedUserAccount = selectUserAccount();
+
+					// 2. Search keyword selection
+					String selectedKeyword = selectKeyword();
+
+					// 3. Categories selection
+					List<Integer> selectedCategoryGroup = selectCategoryGroup();
+
+					group = new Group(selectedUserAccount, selectedKeyword,
+							selectedCategoryGroup, Config.minPrice,
+							Config.maxPrice);
 				}
 
-				UI.printListWithIndexNumbers(groups);
-				group = groups.get(UI.getUserInputInt());
+				// 4. Load & filter
+				List<Item> returnedItems = Network.loadFromEbay(group);
+				List<Item> filteredItems = ResultController
+						.removeInvalid(returnedItems);
 
-				if (group.userAccount == null)
-					group.userAccount = selectUserAccount();
+				// 5. Print and choose items
+				UI.printListWithIndexNumbers(filteredItems);
+				List<String> selectedItemsRowNumbers = UI
+						.getUserInputAndParse();
 
-			} else {
-				// 1. User account selection
-				KeyValuePair selectedUserAccount = selectUserAccount();
+				// 6. Select & send messages
+				UI.selectItemsAndMessages(filteredItems,
+						selectedItemsRowNumbers);
+				SendPrivateMessage.sendMessagesInQueue(group.userAccount);
 
-				// 2. Search keyword selection
-				String selectedKeyword = selectKeyword();
+				// 7. Confirm and write to history
+				if (UI.getUserInput("Was message sending success (y/n) ? ")
+						.trim().toLowerCase().equals("y")) {
+					// write history
+					History.write(SendPrivateMessage.items,
+							SendPrivateMessage.messages);
+					UI.printUI("logged to history");
+				} else {
+					UI.printUI("history cleared");
+				}
 
-				// 3. Categories selection
-				List<Integer> selectedCategoryGroup = selectCategoryGroup();
+				// 8. save search group
+				if (Config.appMode == Config.MODE_NORMAL)
+					GroupsMode.askForSave(group);
 
-				group = new Group(selectedUserAccount, selectedKeyword,
-						selectedCategoryGroup, Config.minPrice, Config.maxPrice);
+				// 9. cleanup
+				UI.printUI("Clearing messages from memory for new cycle");
+				SendPrivateMessage.items.clear();
+				SendPrivateMessage.messages.clear();
+
+				UI.printUI("Cycle done: Re-start");
 			}
-
-			// 4. Load & filter
-			List<Item> returnedItems = Network.loadFromEbay(group);
-			List<Item> filteredItems = ResultController
-					.removeInvalid(returnedItems);
-
-			// 5. Print and choose items
-			UI.printListWithIndexNumbers(filteredItems);
-			List<String> selectedItemsRowNumbers = UI.getUserInputAndParse();
-
-			// 6. Select & send messages
-			UI.selectItemsAndMessages(filteredItems, selectedItemsRowNumbers);
-			SendPrivateMessage.sendMessagesInQueue(group.userAccount);
-
-			// 7. Confirm and write to history
-			if (UI.getUserInput("Was message sending success (y/n) ? ").trim()
-					.toLowerCase().equals("y")) {
-				// write history
-				History.write(SendPrivateMessage.items,
-						SendPrivateMessage.messages);
-				UI.printUI("logged to history");
-			} else {
-				UI.printUI("history cleared");
-			}
-
-			// 8. save search group
-			if (Config.appMode == Config.MODE_NORMAL)
-				GroupsMode.askForSave(group);
-
-			// 9. cleanup
-			UI.printUI("Clearing messages from memory for new cycle");
-			SendPrivateMessage.items.clear();
-			SendPrivateMessage.messages.clear();
-
-			UI.printUI("Cycle done: Re-start");
+		} catch (Exception e) {
+			UI.printError(e.toString());
+			e.printStackTrace();
+			UI.getUserInput("exit");
 		}
 	}
 

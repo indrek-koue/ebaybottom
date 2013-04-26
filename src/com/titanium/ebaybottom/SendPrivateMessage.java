@@ -22,9 +22,13 @@ import com.titanium.ebaybottom.util.TextIO;
 import com.titanium.ebaybottom.util.UI;
 
 public class SendPrivateMessage {
+	private static final String ITEM_MESSAGE_BASE = "http://contact.ebay.com/ws/eBayISAPI.dll?ShowSellerFAQ&";
+	private static final String PERSONAL_MESSAGE_BASE = "http://contact.ebay.com/ws/eBayISAPI.dll?ContactUserNextGen&recipient=";
+
 	private static final String CAPTCHA_ID = "tokenText";
 	private static final String PRIVATEMESSAGE_TITLE_ID = "qusetOther_cnt_cnt";
 	private static final String PRIVATEMESSAGE_BODY_ID = "msg_cnt_cnt";
+
 	public static List<Item> items = new ArrayList<>();
 	public static List<KeyValuePair> messages = new ArrayList<>();
 	private static WebDriver driver;
@@ -39,8 +43,8 @@ public class SendPrivateMessage {
 
 		UI.printUI("Starting private message sending setup...");
 
-		if (driver == null)
-			driver = Network.logIn(selectedUserAccount);
+		// if (driver == null)
+		driver = Network.logIn(selectedUserAccount);
 
 		for (int i = 0; i < items.size(); i++) {
 
@@ -69,7 +73,9 @@ public class SendPrivateMessage {
 			// continue button
 			// <input type="submit" value="Continue" class="btn btn-m btn-prim"
 			// style="width:109px;height:33px">
-			findElementById(driver, "continueBtnDiv").submit();
+			WebElement continueBtn = findElementById(driver, "continueBtnDiv");
+			if (continueBtn != null)
+				continueBtn.submit();
 
 			// title
 			// <input id="qusetOther_cnt_cnt" class="gryFnt" type="text"
@@ -92,61 +98,69 @@ public class SendPrivateMessage {
 			// if (findElementById(driver, "msg_cnt_cnt") != null)
 			// findElementById(driver, "msg_cnt_cnt").sendKeys(
 			// selectedMessage.getValue());
-			if (findElementById(driver, PRIVATEMESSAGE_BODY_ID) != null) {
+			if (findMessageBodyTextbox() != null) {
 				setInstantKeys(driver, PRIVATEMESSAGE_BODY_ID,
-						selectedMessage.getValue());
-				findElementById(driver, PRIVATEMESSAGE_BODY_ID).click();
+						selectedMessage.getValue().replace(Config.PERSONAL_MESSAGE_ADDON, ""));
+				findMessageBodyTextbox().click();
 			}
 
 			// captcha highlight
-			if (findElementById(driver, CAPTCHA_ID) != null) {
-				findElementById(driver, CAPTCHA_ID).click();
+
+			if (findCaptchaTextbox() != null) {
+				findCaptchaTextbox().click();
 
 				// onresume website highlight captcha HACK
-				JavascriptExecutor js2 = (JavascriptExecutor) driver;
-				String onFocusFocus = "var s = document.createElement('script'); s.type = 'text/javascript'; "
-						+ "var code = 'window.onfocus = function () {document.getElementById(\"tokenText\").focus();}';"
-						+ "try {s.appendChild(document.createTextNode(code)); document.body.appendChild(s); } catch (e) {s.text = code; document.body.appendChild(s);}";
-				js2.executeScript(onFocusFocus);
+				injectJavascriptOnResumeHighlightCaptchaTextbox();
 			} else {
 				// captcha is used to determine if we are able to send messages
 				// or not, if captcha doesn't exist, then message sending is not
 				// allowed and we have to redirect user to send personal message
 				// page
 
-				String urlBase = "http://contact.ebay.com/ws/eBayISAPI.dll?ContactUserNextGen&recipient=";
-
 				String username = selectedItem.getSellerInfo().get(0)
 						.getSellerUserName().get(0);
 
-				driver.get(urlBase + username);
+				driver.get(PERSONAL_MESSAGE_BASE + username);
 
-				String msg = Config.personalMessageHeader + " Nr. "
-						+ selectedItem.getItemId().get(0) + " "
-						+ selectedItem.getTitle().get(0) + ".\n\n"
-						+ selectedMessage.getValue();
+				String messageAddonFinal = Config.personalMessageAddon
+						+ " Nr. " + selectedItem.getItemId().get(0) + " "
+						+ selectedItem.getTitle().get(0)+".";
 
-				if (findElementById(driver, PRIVATEMESSAGE_BODY_ID) != null) {
-					setInstantKeys(driver, PRIVATEMESSAGE_BODY_ID, msg);
-					findElementById(driver, PRIVATEMESSAGE_BODY_ID).click();
+				String finalMEssage = selectedMessage.getValue().replace(
+						Config.PERSONAL_MESSAGE_ADDON, messageAddonFinal);
+				
+				if (findMessageBodyTextbox() != null) {
+					setInstantKeys(driver, PRIVATEMESSAGE_BODY_ID, finalMEssage);
+					findMessageBodyTextbox().click();
 				}
 
 				// captcha highlight
-				if (findElementById(driver, CAPTCHA_ID) != null) {
-					findElementById(driver, CAPTCHA_ID).click();
+				if (findCaptchaTextbox() != null) {
+					findCaptchaTextbox().click();
 
-					// onresume website highlight captcha HACK
-					JavascriptExecutor js2 = (JavascriptExecutor) driver;
-					String onFocusFocus = "var s = document.createElement('script'); s.type = 'text/javascript'; "
-							+ "var code = 'window.onfocus = function () {document.getElementById(\"tokenText\").focus();}';"
-							+ "try {s.appendChild(document.createTextNode(code)); document.body.appendChild(s); } catch (e) {s.text = code; document.body.appendChild(s);}";
-					js2.executeScript(onFocusFocus);
+					injectJavascriptOnResumeHighlightCaptchaTextbox();
 				}
 			}
 		}
 
 		SessionCache.Write(selectedUserAccount, driver.manage().getCookies());
 		UI.printUI("Message sending setup finished");
+	}
+
+	private static WebElement findMessageBodyTextbox() {
+		return findElementById(driver, PRIVATEMESSAGE_BODY_ID);
+	}
+
+	private static WebElement findCaptchaTextbox() {
+		return findElementById(driver, CAPTCHA_ID);
+	}
+
+	private static void injectJavascriptOnResumeHighlightCaptchaTextbox() {
+		JavascriptExecutor js2 = (JavascriptExecutor) driver;
+		String onFocusFocus = "var s = document.createElement('script'); s.type = 'text/javascript'; "
+				+ "var code = 'window.onfocus = function () {document.getElementById(\"tokenText\").focus();}';"
+				+ "try {s.appendChild(document.createTextNode(code)); document.body.appendChild(s); } catch (e) {s.text = code; document.body.appendChild(s);}";
+		js2.executeScript(onFocusFocus);
 	}
 
 	public static void setInstantKeys(WebDriver driver, String id,
@@ -164,8 +178,8 @@ public class SendPrivateMessage {
 
 	private static String composeMessageUrl(Item i) {
 		String s = String
-				.format("http://contact.ebay.com/ws/eBayISAPI.dll?ShowSellerFAQ&iid=%s&"
-						+ "requested=%s&redirect=0&ssPageName=PageSellerM2MFAQ_VI",
+				.format(ITEM_MESSAGE_BASE
+						+ "iid=%s&requested=%s&redirect=0&ssPageName=PageSellerM2MFAQ_VI",
 						i.getItemId().get(0), i.getSellerInfo().get(0)
 								.getSellerUserName().get(0));
 		UI.printDebug("MSG URL: " + s);

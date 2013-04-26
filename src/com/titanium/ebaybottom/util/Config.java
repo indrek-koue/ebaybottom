@@ -18,6 +18,7 @@ public class Config {
 
 	public static final int MODE_NORMAL = 0;
 	public static final int MODE_GROUPS = 1;
+	public static final CharSequence PERSONAL_MESSAGE_ADDON = "***PERSONAL_MESSAGE_ADDON***";
 
 	// BotMain
 	public static int minPrice;
@@ -37,7 +38,7 @@ public class Config {
 
 	// dev
 	public static boolean isDebugLogging;
-	public static String personalMessageHeader;
+	public static String personalMessageAddon;
 
 	public static boolean load(String path) {
 		try {
@@ -61,7 +62,7 @@ public class Config {
 			locale = main.get("LOCALE");
 			windowOpenTimeout = Integer.parseInt(main
 					.get("TIMEOUT_BETWEEN_OPEN_PM_WINDOW"));
-			personalMessageHeader = main.get("PERSONAL_MESSAGE_HEADER");
+			personalMessageAddon = main.get("PERSONAL_MESSAGE_ADDON");
 			appMode = Integer.parseInt(main.get("APP_MODE"));
 
 			Section lists = ini.get("CSVLists");
