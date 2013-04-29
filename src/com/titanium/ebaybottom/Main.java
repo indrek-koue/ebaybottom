@@ -46,9 +46,9 @@ public class Main {
 	public static final String CONFIG_FILE = "config.ini";
 	public static final String HISTORY_FILE = "history.txt";
 	public static final String GROUP_FILE = "groups.txt";
-	private static final int APP_VERSION = 7;
+	private static final int APP_VERSION = 8;
 
-	public static final boolean isDebug = true;
+	public static final boolean isDebug = false;
 
 	// superdealsyysi#Stupid123456
 	public static void main(String[] args) {
