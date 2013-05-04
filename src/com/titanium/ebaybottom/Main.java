@@ -12,6 +12,7 @@ import java.util.Calendar;
 import java.util.List;
 
 import org.apache.commons.lang3.StringEscapeUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.ClientProtocolException;
@@ -40,6 +41,7 @@ import com.titanium.ebaybottom.util.ApiKey;
 import com.titanium.ebaybottom.util.Config;
 import com.titanium.ebaybottom.util.TextIO;
 import com.titanium.ebaybottom.util.UI;
+import com.titanium.ebaybottom.util.Util;
 
 public class Main {
 
@@ -47,8 +49,9 @@ public class Main {
 	public static final String HISTORY_FILE = "history.txt";
 	public static final String GROUP_FILE = "groups.txt";
 	private static final int APP_VERSION = 8;
+	public static final String DISPLAY_SEPARATOR = "|";
 
-	public static final boolean isDebug = false;
+	public static final boolean isDebug = true;
 
 	// superdealsyysi#Stupid123456
 	public static void main(String[] args) {
@@ -108,6 +111,8 @@ public class Main {
 						.removeInvalid(returnedItems);
 
 				// 5. Print and choose items
+				//print header
+				UI.printResultHeader(); 
 				UI.printListWithIndexNumbers(filteredItems);
 				List<String> selectedItemsRowNumbers = UI
 						.getUserInputAndParse();

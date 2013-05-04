@@ -3,11 +3,14 @@ package com.titanium.ebaybottom.model;
 import java.util.List;
 
 import org.apache.commons.lang3.StringEscapeUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormatter;
 import org.joda.time.format.DateTimeFormatterBuilder;
 
 import com.titanium.ebaybottom.History;
+import com.titanium.ebaybottom.Main;
+import com.titanium.ebaybottom.util.Util;
 
 public class Item {
 	private List<String> autoPay;
@@ -210,18 +213,20 @@ public class Item {
 
 	@Override
 	public String toString() {
-
 		String username = sellerInfo.get(0).getSellerUserName().get(0);
 		String price = sellingStatus.get(0).getCurrentPrice().get(0)
 				.get__value__();
 		String positiveCount = sellerInfo.get(0).getFeedbackScore().get(0);
+		String timeLeft = sellingStatus.get(0).getTimeLeft().get(0);
 
-		String template = "%s " + History.csvSeparator + " %s$ "
-				+ History.csvSeparator + " %s " + History.csvSeparator + " %s "
-				+ History.csvSeparator + " %s";
-
-		return String.format(template, username, price, positiveCount,
-				itemId.get(0), title.get(0));
+		return StringUtils.join(
+				new String[] { Util.padLeftAndCutIfNeeded(username, 10),
+						Util.padLeftAndCutIfNeeded(price, 6),
+						Util.padLeftAndCutIfNeeded(positiveCount, 4),
+						Util.padLeftAndCutIfNeeded(itemId.get(0), 13),
+						Util.padLeftAndCutIfNeeded(timeLeft, 13),
+						Util.padLeftAndCutIfNeeded(title.get(0), 20) },
+				Main.DISPLAY_SEPARATOR);
 	}
 
 	public String toLog(String csvSeparator, KeyValuePair userMsg) {

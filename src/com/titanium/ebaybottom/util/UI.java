@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import org.apache.commons.lang3.StringUtils;
+
 import com.titanium.ebaybottom.Main;
 import com.titanium.ebaybottom.SendPrivateMessage;
 import com.titanium.ebaybottom.model.Item;
@@ -43,7 +45,8 @@ public class UI {
 	public static <T> void printListWithIndexNumbers(List<T> list) {
 		System.out.println();
 		for (int i = 0; i < list.size(); i++) {
-			System.out.println(i + ". " + list.get(i));
+			System.out.println(String.format("%2d. %s", i, list.get(i)));
+			// System.out.println(i + ". " + list.get(i));
 		}
 	}
 
@@ -76,8 +79,8 @@ public class UI {
 
 			if (isFirstRun) {
 				UI.printUI("Select messages for items");
-						
-						//+ selectedItem.getTitle().get(0));
+
+				// + selectedItem.getTitle().get(0));
 
 				UI.printListWithIndexNumbers(Config.messagesToUsers);
 
@@ -114,4 +117,17 @@ public class UI {
 
 		return selectedItems;
 	}
+
+	public static void printResultHeader() {
+		System.out.println();
+		System.out.println(StringUtils.join(
+				new String[] { Util.padLeftAndCutIfNeeded("USERNAME", 14),
+						Util.padLeftAndCutIfNeeded("PRICE", 6),
+						Util.padLeftAndCutIfNeeded("POS.", 4),
+						Util.padLeftAndCutIfNeeded("ITEM ID", 13),
+						Util.padLeftAndCutIfNeeded("TIME LEFT", 13),
+						Util.padLeftAndCutIfNeeded("TITLE", 20) },
+				Main.DISPLAY_SEPARATOR));
+	}
+
 }
