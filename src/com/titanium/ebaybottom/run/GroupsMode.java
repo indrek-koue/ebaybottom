@@ -17,12 +17,11 @@ import com.titanium.ebaybottom.run.util.Util;
 public class GroupsMode {
 
 	public static void save(Group group) {
-
 		try {
-			UI.printDebug("write to groups mode: " + group);
+			FileUtils.writeStringToFile(new File(Main.GROUP_FILE),
+					group.toString() + "\n", true);
 
-			FileUtils.writeStringToFile(new File(Main.GROUP_FILE), group.toString()
-					+ "\n", true);
+			UI.printUI("group saved:" + group.toString());
 		} catch (IOException e) {
 			e.printStackTrace();
 		}

@@ -12,24 +12,11 @@ public class Group {
 	private static final String CSV_SEPARATOR = "###";
 	private static final String ITEM_SEPARATOR = "|||";
 	private static final String EMPTY_USER = "???:???";
-	// public Pair userAccount;
-	// public String keyword;
-	// public List<Integer> categoryGroup = new ArrayList<Integer>();
-	// public int minPrice;
-	// public int maxPrice;
+
 	public Pair<String, String> userAccount;
 	public List<String> keywords = new ArrayList<>();
 	public List<List<Integer>> categoryGroups = new ArrayList<List<Integer>>();
 	public List<Pair<Integer, Integer>> prices = new ArrayList<Pair<Integer, Integer>>();
-
-	// public Group(Pair selectedUserAccount, String selectedKeyword,
-	// List<Integer> selectedCategoryGroup, int minPrice, int maxPrice) {
-	// this.userAccount = selectedUserAccount;
-	// this.keyword = selectedKeyword;
-	// this.categoryGroup = selectedCategoryGroup;
-	// this.minPrice = minPrice;
-	// this.maxPrice = maxPrice;
-	// }
 
 	public Group(Pair<String, String> userAccount, List<String> keywords,
 			List<List<Integer>> categoryGroups,
@@ -56,6 +43,7 @@ public class Group {
 
 		keywords = Arrays.asList(columns[1].split("\\|\\|\\|"));
 
+		// categorie groups
 		String[] categoriesGroups = columns[2].split("\\|\\|\\|");
 
 		for (String string : categoriesGroups) {
@@ -66,28 +54,18 @@ public class Group {
 			for (String string2 : categories) {
 				category.add(Integer.parseInt(string2.trim()));
 			}
-			
+
 			categoryGroups.add(category);
 		}
-		//
-		//
-		// String[]gategories = gategoriesGroups.
-		//
-		// for (int i = 0; i < gategories.length; i++) {
-		// String rawString = gategories[i].replace("[", "").replace("]", "")
-		// .trim();
-		// categoryGroups.add(Integer.parseInt(rawString));
-		// }
 
+		// price
 		String[] pricesRaw = columns[3].split("\\|\\|\\|");
-
 		for (int i = 0; i < pricesRaw.length; i++) {
-			prices.add(new Pair<Integer, Integer>(pricesRaw[i]));
+			prices.add(new Pair<Integer, Integer>(Integer.parseInt(pricesRaw[i]
+					.split(Pair.VALUE_SPLITTER)[0]), Integer
+					.parseInt(pricesRaw[i].split(Pair.VALUE_SPLITTER)[1])));
 		}
 
-		//
-		// minPrice = Integer.parseInt(columns[3]);
-		// maxPrice = Integer.parseInt(columns[4]);
 	}
 
 	@Override

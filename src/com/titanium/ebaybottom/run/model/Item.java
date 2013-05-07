@@ -2,17 +2,17 @@ package com.titanium.ebaybottom.run.model;
 
 import java.util.List;
 
+import javax.xml.datatype.DatatypeConfigurationException;
+import javax.xml.datatype.DatatypeFactory;
+import javax.xml.datatype.Duration;
+
 import org.apache.commons.lang3.StringEscapeUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.joda.time.DateTime;
-import org.joda.time.format.DateTimeFormatter;
-import org.joda.time.format.DateTimeFormatterBuilder;
-
-import com.titanium.ebaybottom.run.History;
 import com.titanium.ebaybottom.run.Main;
 import com.titanium.ebaybottom.run.util.Util;
 
-public class Item {
+public class Item implements Comparable<Item> {
 	private List<String> autoPay;
 	private List<Condition> condition;
 	private List<String> country;
@@ -229,12 +229,37 @@ public class Item {
 				Main.DISPLAY_SEPARATOR);
 	}
 
-	public String toLog(String csvSeparator, Pair userMsg) {
+	public String toLog(String csvSeparator, Pair<String,String> userMsg) {
 
 		String userMessageEscaped = StringEscapeUtils.escapeJava(userMsg
 				.getKey() + ":" + userMsg.getValue());
 
 		return DateTime.now().toString() + " " + csvSeparator + " "
 				+ toString() + csvSeparator + userMessageEscaped + "\n";
+	}
+
+	@Override
+	public int compareTo(Item o) {
+		// Returns a negative integer, zero, or a positive integer as
+		// this object is less than, equal to, or greater than the specified
+		// object.
+
+		String timeLeft = sellingStatus.get(0).getTimeLeft().get(0);
+		String timeLeft2 = o.getSellingStatus().get(0).getTimeLeft().get(0);
+		Duration d = null;
+		Duration d2 = null;
+
+		try {
+			d = DatatypeFactory.newInstance().newDuration(timeLeft);
+			d2 = DatatypeFactory.newInstance().newDuration(timeLeft2);
+		} catch (DatatypeConfigurationException e) {
+			e.printStackTrace();
+		}
+
+		if (d != null)
+			return d.compare(d2);
+		else
+			return 0;
+
 	}
 }

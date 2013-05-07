@@ -77,34 +77,40 @@ public class Network {
 
 		for (String keyword : group.keywords)
 			for (List<Integer> categories : group.categoryGroups)
-				for (Pair<Integer, Integer> price : group.prices)
-					result.addAll(ebayServerRequest(buildUri(keyword,
-							categories, price.getKey(), price.getValue())));
+				for (Pair<Integer, Integer> price : group.prices) {
+
+					String uri = buildUri(keyword, categories, price.getKey(),
+							price.getValue());
+
+					result.addAll(ebayServerRequest(uri));
+				}
 
 		return result;
 	}
 
 	public static List<Item> ebayServerRequest(String uri) {
-return null;
-//		String returnJson = "";
-//		try {
-//			HttpResponse response = new DefaultHttpClient()
-//					.execute(new HttpGet(uri));
-//
-//			String json = EntityUtils.toString(response.getEntity());
-//
-//			// have to replace @ signs because eBay returns faulty JSON
-//			returnJson = json.replace("\"@", "");
-//
-//			UI.printDebug("@ chars removed count:"
-//					+ (json.length() - returnJson.length()));
-//
-//		} catch (Exception e) {
-//			e.printStackTrace();
-//			UI.printError(e.toString());
-//		}
-//
-//		return ResultController.parseItems(returnJson);
+
+		UI.printUI("Request to eBay server...");
+		UI.printDebug(uri);
+		String returnJson = "";
+		try {
+			HttpResponse response = new DefaultHttpClient()
+					.execute(new HttpGet(uri));
+
+			String json = EntityUtils.toString(response.getEntity());
+
+			// have to replace @ signs because eBay returns faulty JSON
+			returnJson = json.replace("\"@", "");
+
+			UI.printDebug("@ chars removed count:"
+					+ (json.length() - returnJson.length()));
+
+		} catch (Exception e) {
+			e.printStackTrace();
+			UI.printError(e.toString());
+		}
+
+		return ResultController.parseItems(returnJson);
 	}
 
 	private static String buildUri(String keyword, List<Integer> categories,
@@ -152,10 +158,10 @@ return null;
 			// defaults to USD.
 			uBuilder.addParameter("itemFilter(1).name", "MaxPrice");
 			uBuilder.addParameter("itemFilter(1).value",
-					Integer.toString(minPrice));
+					Integer.toString(maxPrice));
 			uBuilder.addParameter("itemFilter(2).name", "MinPrice");
 			uBuilder.addParameter("itemFilter(2).value",
-					Integer.toString(maxPrice));
+					Integer.toString(minPrice));
 
 			// Limits the results to items ending on or after the specified
 			// time.

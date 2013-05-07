@@ -1,6 +1,7 @@
 package com.titanium.ebaybottom.run;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import org.ini4j.jdk14.edu.emory.mathcs.backport.java.util.Arrays;
@@ -107,6 +108,13 @@ public class ResultController {
 		result = advancedResponse.getSearchResult().get(0).getItem();
 
 		return result;
+	}
+
+	public static List<Item> sortByEndDateAsc(List<Item> filteredItems) {
+
+		Collections.sort(filteredItems);
+
+		return filteredItems;
 	}
 
 }

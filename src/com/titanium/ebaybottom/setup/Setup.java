@@ -16,67 +16,24 @@ public class Setup {
 
 		while (true) {
 
-//			// 1. User account selection
-//			Pair<String, String> userAccount = selectUserAccount();
-//
-//			// 2. Search keyword selection
-//			List<String> keywords = select(Config.keywords);
-//
-//			// 3. Categories selection
-//			List<List<Integer>> categoryGroups = select(Config.categories);
-//
-//			// 4. max-min price
-//			List<Pair<Integer, Integer>> prices = select(Config.prices);
-//
-//			// 5. save
-//			GroupsMode.save(new Group(userAccount, keywords, categoryGroups,
-//					prices));
-//
-//			UI.printUI("Cycle done: Re-start");
+			// 1. User account selection
+			Pair<String, String> userAccount = selectUserAccount();
 
-			List<Group> load = GroupsMode.load();
-			for (Group group : load) {
-				UI.printDebug(group);
-				
-				
-			}
+			// 2. Search keyword selection
+			List<String> keywords = select(Config.keywords);
+
+			// 3. Categories selection
+			List<List<Integer>> categoryGroups = select(Config.categories);
+
+			// 4. max-min price
+			List<Pair<Integer, Integer>> prices = select(Config.prices);
+
+			// 5. save
+			GroupsMode.save(new Group(userAccount, keywords, categoryGroups,
+					prices));
 		}
 
 	}
-
-	// private static List<Pair<Integer, Integer>> selectPrices() {
-	//
-	// UI.printListWithIndexNumbers(Config.prices);
-	//
-	// List<Pair<Integer, Integer>> selectedPrices = new ArrayList<>();
-	//
-	// for (int i : UI.getUserInputMultiSelect())
-	// selectedPrices.add(Config.prices.get(i));
-	//
-	// return selectedPrices;
-	// }
-	//
-	// private static List<List<Integer>> selectCategoryGroup() {
-	// UI.printListWithIndexNumbers(Config.categories);
-	//
-	// List<List<Integer>> selectedCategoryGroup = new ArrayList<>();
-	//
-	// for (int i : UI.getUserInputMultiSelect())
-	// selectedCategoryGroup.add(Config.categories.get(i));
-	//
-	// return selectedCategoryGroup;
-	// }
-	//
-	// private static List<String> selectKeyword() {
-	// UI.printListWithIndexNumbers(Config.keywords);
-	//
-	// List<String> selectedKeyword = new ArrayList<>();
-	//
-	// for (int i : UI.getUserInputMultiSelect())
-	// selectedKeyword.add(Config.keywords.get(i));
-	//
-	// return selectedKeyword;
-	// }
 
 	private static <T> List<T> select(List<T> list) {
 
@@ -90,7 +47,7 @@ public class Setup {
 		return selectedItems;
 	}
 
-	private static Pair<String, String> selectUserAccount() {
+	public static Pair<String, String> selectUserAccount() {
 		UI.printListWithIndexNumbers(Config.users);
 
 		UI.printUI("Select user account. Enter -1 to leave this field empty");

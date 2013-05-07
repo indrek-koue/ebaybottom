@@ -16,33 +16,25 @@ import com.titanium.ebaybottom.run.model.Pair;
 
 public class Config {
 
-	public static final int MODE_NORMAL = 0;
-	public static final int MODE_GROUPS = 1;
 	public static final CharSequence PERSONAL_MESSAGE_ADDON = "***PERSONAL_MESSAGE_ADDON***";
 
 	// BotMain
-//	public static int minPrice;
-//	public static int maxPrice;
 	public static int resultCount;
 	public static int feedbackLimit;
 	public static String locale;
-//	public static int windowOpenTimeout;
-//	public static int appMode;
+	public static String personalMessageAddon;
 
 	// csvlists
-	public static List<Pair<String,String>> users;
+	public static List<Pair<String, String>> users;
 	public static List<String> keywords;
 	public static List<List<Integer>> categories;
-	public static List<Pair<String,String>> messagesToUsers;
+	public static List<Pair<String, String>> messagesToUsers;
 	public static List<String> blackListedUsers;
+	public static List<Pair<Integer, Integer>> prices;
 
 	// dev
 	public static boolean isDebugLogging;
-	
-	public static String personalMessageAddon;
-	public static List<Pair<Integer, Integer>> prices;
 
-	
 	public static boolean load(String path) {
 		try {
 			UI.printUI("Load config.ini from:" + path);
@@ -58,24 +50,16 @@ public class Config {
 			Ini ini = new Ini(f);
 
 			Section main = ini.get("BotMain");
-//			minPrice = main.get("MIN_PRICE", Integer.class);
-//			maxPrice = main.get("MAX_PRICE", Integer.class);
 			prices = parseKeyValueList(main.get("PRICES"));
 			resultCount = main.get("RESULT_COUNT", Integer.class);
 			feedbackLimit = main.get("FEEDBACK_LIMIT_FILTER", Integer.class);
 			locale = main.get("LOCALE");
-//			windowOpenTimeout = Integer.parseInt(main
-//					.get("TIMEOUT_BETWEEN_OPEN_PM_WINDOW"));
 			personalMessageAddon = main.get("PERSONAL_MESSAGE_ADDON");
-//			appMode = Integer.parseInt(main.get("APP_MODE"));
 
 			Section lists = ini.get("CSVLists");
 			users = parseKeyValueList(lists.get("USERS"));
-			
 			keywords = Arrays.asList(lists.get("KEYWORDS").split(","));
-
 			categories = parseGroups(lists.get("CATEGORIES"));
-
 			messagesToUsers = parseKeyValueList(lists.get("MESSAGESTOUSERS"));
 			blackListedUsers = Arrays.asList(lists.get("BLACKLISTEDUSERS")
 					.split(","));
@@ -98,7 +82,6 @@ public class Config {
 		for (String rawGroup : input.split("#")) {
 
 			String[] rawMembers = rawGroup.split(",");
-
 			ArrayList<Integer> group = new ArrayList<Integer>();
 
 			for (int i = 0; i < rawMembers.length; i++)
@@ -110,7 +93,7 @@ public class Config {
 		return cs;
 	}
 
-	private static<K,V> List<Pair<K, V>> parseKeyValueList(String input) {
+	private static <K, V> List<Pair<K, V>> parseKeyValueList(String input) {
 
 		List<Pair<K, V>> result = new ArrayList<>();
 
@@ -121,19 +104,12 @@ public class Config {
 	}
 
 	public static void print() {
-//		System.out
-//				.println(String
-//						.format("minPrice=%s\nmaxPrice=%s\nresultCount=%s\nfeedbackLimit=%s\nlocale=%s\nwindowOpenTimeoutSec=%s",
-//								minPrice, maxPrice, resultCount, feedbackLimit,
-//								locale, windowOpenTimeout));
-
 		UI.printList("users", users);
 		UI.printList("keywords", keywords);
 		UI.printList("categories", categories);
 		UI.printList("messagesToUser", messagesToUsers);
 		UI.printList("blackListedUsers", blackListedUsers);
+		UI.printList("prices", prices);
 	}
-	
-	
 
 }

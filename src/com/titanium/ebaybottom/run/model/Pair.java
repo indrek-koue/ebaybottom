@@ -2,18 +2,13 @@ package com.titanium.ebaybottom.run.model;
 
 public class Pair<K, V> {
 
-	private static final String VALUE_SPLITTER = ":";
+	public static final String VALUE_SPLITTER = ":";
 	private K key;
 	private V value;
 
 	public Pair(K key, V value) {
 		this.setKey(key);
 		this.setValue(value);
-	}
-
-	public Pair(String string) {
-		this.setKey((K) string.split(VALUE_SPLITTER)[0]);
-		this.setValue((V) string.split(VALUE_SPLITTER)[1]);
 	}
 
 	public K getKey() {

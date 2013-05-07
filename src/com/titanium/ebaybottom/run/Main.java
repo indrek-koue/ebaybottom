@@ -49,7 +49,7 @@ public class Main {
 	public static final String CONFIG_FILE = "config.ini";
 	public static final String HISTORY_FILE = "app_data/history.txt";
 	public static final String GROUP_FILE = "app_data/groups.txt";
-	private static final int APP_VERSION = 8;
+	private static final int APP_VERSION = 10;
 	public static final String DISPLAY_SEPARATOR = "|";
 
 	public static final boolean isDebug = false;
@@ -71,65 +71,59 @@ public class Main {
 
 			UI.printUI("Version: " + APP_VERSION);
 
-//			if (args.length != 0) {
+			if (args.length != 0) {
 				Setup.run();
 				return;
-//			}
+			}
 
-//			while (true) {
+			while (true) {
 
-//				// load saved groups
-//				List<Group> groups = GroupsMode.load();
-//				if (groups == null || groups.size() == 0) {
-//					UI.printError("no groups exist in " + GROUP_FILE);
-//					return;
-//				}
-//
-//				UI.printListWithIndexNumbers(groups);
-//				Group group = groups.get(UI.getUserInputInt());
-//
-//				if (group.userAccount == null)
-//					group.userAccount = selectUserAccount();
-//
-//				// 4. Load & filter
-//				List<Item> returnedItems = Network.loadFromEbay(group);
-//				List<Item> filteredItems = ResultController
-//						.removeInvalid(returnedItems);
-//
-//				// 5. Print and choose items
-//				// print header
-//				UI.printResultHeader();
-//				UI.printListWithIndexNumbers(filteredItems);
-//				List<Integer> selectedItemsRowNumbers = UI
-//						.getUserInputMultiSelect();
-//
-//				// 6. Select & send messages
-//				UI.selectItemsAndMessages(filteredItems,
-//						selectedItemsRowNumbers);
-//				SendPrivateMessage.sendMessagesInQueue(group.userAccount);
-//
-//				// 7. Confirm and write to history
-//				if (UI.getUserInput("Was message sending success (y/n) ? ")
-//						.trim().toLowerCase().equals("y")) {
-//					// write history
-//					History.write(SendPrivateMessage.items,
-//							SendPrivateMessage.messages);
-//					UI.printUI("logged to history");
-//				} else {
-//					UI.printUI("history cleared");
-//				}
-//
-////				// 8. save search group
-////				if (Config.appMode == Config.MODE_NORMAL)
-////					GroupsMode.askForSave(group);
-//
-//				// 9. cleanup
-//				UI.printUI("Clearing messages from memory for new cycle");
-//				SendPrivateMessage.items.clear();
-//				SendPrivateMessage.messages.clear();
-//
-//				UI.printUI("Cycle done: Re-start");
-//			}
+				// load saved groups
+				List<Group> groups = GroupsMode.load();
+				if (groups == null || groups.size() == 0) {
+					UI.printError("no groups exist in " + GROUP_FILE);
+					return;
+				}
+
+				UI.printListWithIndexNumbers(groups);
+				Group group = groups.get(UI.getUserInputInt());
+
+				if (group.userAccount == null)
+					group.userAccount = Setup.selectUserAccount();
+
+				// 4. Load, filter & sort
+				List<Item> filteredSortedItems = loadFilterSort(group);
+
+				// 5. Print and choose items
+				// print header
+				UI.printResultHeader();
+				UI.printListWithIndexNumbers(filteredSortedItems);
+				List<Integer> selectedItemsRowNumbers = UI
+						.getUserInputMultiSelect();
+
+				// 6. Select & send messages
+				UI.selectItemsAndMessages(filteredSortedItems,
+						selectedItemsRowNumbers);
+				SendPrivateMessage.sendMessagesInQueue(group.userAccount);
+
+				// 7. Confirm and write to history
+				if (UI.getUserInput("Was message sending success (y/n) ? ")
+						.trim().toLowerCase().equals("y")) {
+					// write history
+					History.write(SendPrivateMessage.items,
+							SendPrivateMessage.messages);
+					UI.printUI("logged to history");
+				} else {
+					UI.printUI("history cleared");
+				}
+
+				// 9. cleanup
+				UI.printUI("Clearing messages from memory for new cycle");
+				SendPrivateMessage.items.clear();
+				SendPrivateMessage.messages.clear();
+
+				UI.printUI("Cycle done: Re-start");
+			}
 		} catch (Exception e) {
 			UI.printError(e.toString());
 			e.printStackTrace();
@@ -137,24 +131,18 @@ public class Main {
 		}
 	}
 
-	// private static List<Integer> selectCategoryGroup() {
-	// UI.printListWithIndexNumbers(Config.categories);
-	// List<Integer> selectedCategoryGroup = Config.categories.get(isDebug ? 0
-	// : UI.getUserInputInt());
-	// return selectedCategoryGroup;
-	// }
-	//
-	// private static String selectKeyword() {
-	// UI.printListWithIndexNumbers(Config.keywords);
-	// String selectedKeyword = Config.keywords.get(isDebug ? 0 : UI
-	// .getUserInputInt());
-	// return selectedKeyword;
-	// }
+	private static List<Item> loadFilterSort(Group group) {
+		List<Item> returnedItems = Network.loadFromEbay(group);
 
-	private static Pair selectUserAccount() {
-		UI.printListWithIndexNumbers(Config.users);
-		Pair selectedUserAccount = Config.users.get(isDebug ? 0 : UI
-				.getUserInputInt());
-		return selectedUserAccount;
+		UI.printUI("filtering items");
+
+		List<Item> filteredItems = ResultController
+				.removeInvalid(returnedItems);
+
+		UI.printUI("sorting items");
+		List<Item> sortedItems = ResultController
+				.sortByEndDateAsc(filteredItems);
+
+		return sortedItems;
 	}
 }
