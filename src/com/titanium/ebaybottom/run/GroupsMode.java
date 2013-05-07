@@ -27,26 +27,20 @@ public class GroupsMode {
 		}
 	}
 
-	public static List<Group> load() {
+	public static List<Group> load() throws IOException {
 
 		List<Group> result = new ArrayList<>();
-		try {
 
 			File f = new File(Main.GROUP_FILE);
 			if (!f.exists()) {
-				f.createNewFile();
-				return null;
+				//f.createNewFile();
+				return result;
 			}
 
 			List<String> rows = FileUtils.readLines(f);
 
 			for (String row : rows)
 				result.add(new Group(row));
-
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
 
 		return result;
 	}

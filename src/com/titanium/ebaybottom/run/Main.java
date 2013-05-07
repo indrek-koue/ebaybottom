@@ -49,9 +49,9 @@ public class Main {
 	public static final String CONFIG_FILE = "config.ini";
 	public static final String HISTORY_FILE = "app_data/history.txt";
 	public static final String GROUP_FILE = "app_data/groups.txt";
-	private static final int APP_VERSION = 10;
 	public static final String DISPLAY_SEPARATOR = "|";
 
+	private static final int APP_VERSION = 10;
 	public static final boolean isDebug = false;
 
 	// superdealsyysi#Stupid123456
@@ -82,11 +82,12 @@ public class Main {
 				List<Group> groups = GroupsMode.load();
 				if (groups == null || groups.size() == 0) {
 					UI.printError("no groups exist in " + GROUP_FILE);
+					UI.getUserInput("exit?");
 					return;
 				}
 
 				UI.printListWithIndexNumbers(groups);
-				Group group = groups.get(UI.getUserInputInt());
+				Group group = groups.get(isDebug ? 0 : UI.getUserInputInt());
 
 				if (group.userAccount == null)
 					group.userAccount = Setup.selectUserAccount();
@@ -123,12 +124,15 @@ public class Main {
 				SendPrivateMessage.messages.clear();
 
 				UI.printUI("Cycle done: Re-start");
+
 			}
 		} catch (Exception e) {
 			UI.printError(e.toString());
 			e.printStackTrace();
 			UI.getUserInput("exit?");
 		}
+
+		UI.getUserInput("exit?");
 	}
 
 	private static List<Item> loadFilterSort(Group group) {

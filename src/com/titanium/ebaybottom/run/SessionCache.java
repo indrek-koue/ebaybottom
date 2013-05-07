@@ -10,6 +10,7 @@ import java.util.Set;
 
 import org.apache.commons.collections.SetUtils;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.ini4j.jdk14.edu.emory.mathcs.backport.java.util.Arrays;
 import org.joda.time.DateTime;
 import org.openqa.selenium.Cookie;
@@ -51,7 +52,17 @@ public class SessionCache {
 		}
 
 		for (Cookie cookie : cookies) {
-			String toWrite = cookie.getName() + "=" + cookie.getValue() + "\n";
+			String toWriteCookie = cookie.getName() + "=" + cookie.getValue();
+
+			String toWriteDate = "";
+//					String.valueOf(cookie.getExpiry().getTime());
+			String toWritePath = cookie.getPath();
+			String toWriteDomain = cookie.getDomain();
+
+			String toWrite = StringUtils.join(new String[] { toWriteCookie,
+					toWriteDate, toWritePath, toWriteDomain }, ";")
+					+ "\n";
+
 			try {
 				FileUtils.writeStringToFile(f, toWrite, true);
 			} catch (IOException e) {
@@ -78,14 +89,15 @@ public class SessionCache {
 				List<String> cookies = FileUtils.readLines(f);
 
 				for (int i = 0; i < cookies.size(); i++) {
-					String cName = cookies.get(i).split("=")[0];
-					String cValue = cookies.get(i).split("=")[1];
 
-					Calendar c = Calendar.getInstance();
-					c.set(3000, 1, 1);
-					cookiesToReturn.add(new Cookie(cName, cValue, ".ebay.com",
-							"/", c.getTime()));
-					// cookiesToReturn.add(new Cookie(cName, cValue));
+					String cName = cookies.get(i).split(";")[0].split("=")[0];
+					String cValue = cookies.get(i).split(";")[0].split("=")[1];
+					//Date expireDate = new Date(cookies.get(i).split(";")[1]);
+					String path = cookies.get(i).split(";")[2];
+					String domain = cookies.get(i).split(";")[3];
+
+					cookiesToReturn.add(new Cookie(cName, cValue, domain, path,
+							null));
 				}
 
 			} catch (IOException e) {
