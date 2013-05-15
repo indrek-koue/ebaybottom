@@ -54,8 +54,8 @@ public class SessionCache {
 		for (Cookie cookie : cookies) {
 			String toWriteCookie = cookie.getName() + "=" + cookie.getValue();
 
-			String toWriteDate = "";
-//					String.valueOf(cookie.getExpiry().getTime());
+			String toWriteDate = String.valueOf(cookie.getExpiry() == null ? ""
+					: cookie.getExpiry().getTime());
 			String toWritePath = cookie.getPath();
 			String toWriteDomain = cookie.getDomain();
 
@@ -90,14 +90,17 @@ public class SessionCache {
 
 				for (int i = 0; i < cookies.size(); i++) {
 
-					String cName = cookies.get(i).split(";")[0].split("=")[0];
-					String cValue = cookies.get(i).split(";")[0].split("=")[1];
-					//Date expireDate = new Date(cookies.get(i).split(";")[1]);
-					String path = cookies.get(i).split(";")[2];
-					String domain = cookies.get(i).split(";")[3];
+					String[] cParams = cookies.get(i).split(";");
+
+					String cName = cParams[0].split("=")[0];
+					String cValue = cParams[0].split("=")[1];
+					Date expireDate = cParams[1].equals("") ? null : new Date(
+							Long.parseLong(cParams[1]));
+					String path = cParams[2];
+					String domain = cParams[3];
 
 					cookiesToReturn.add(new Cookie(cName, cValue, domain, path,
-							null));
+							expireDate));
 				}
 
 			} catch (IOException e) {
