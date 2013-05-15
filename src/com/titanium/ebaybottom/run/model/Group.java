@@ -7,79 +7,86 @@ import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
 
+// superdealsyysi:Stupid123456###tom tom xl||| iPhone 5S
+// supercharger###[293, 3270, 156955]###10:50|||100:150
+
 public class Group {
 
-	private static final String CSV_SEPARATOR = "###";
-	private static final String ITEM_SEPARATOR = "|||";
+	private static final String CSV_SEPARATOR_1 = "###";
+	private static final String CSV_SEPARATOR_2 = "\\|\\|\\|";
+	private static final String CSV_SEPARATOR_3 = "%%%";
 	private static final String EMPTY_USER = "???:???";
 
 	public Pair<String, String> userAccount;
-	public List<String> keywords = new ArrayList<>();
-	public List<List<Integer>> categoryGroups = new ArrayList<List<Integer>>();
-	public List<Pair<Integer, Integer>> prices = new ArrayList<Pair<Integer, Integer>>();
+	public List<Pair<String, Pair<Integer, Integer>>> keywordsWithPrices = new ArrayList<>();
+	public List<Integer> categories = new ArrayList<>();
 
-	public Group(Pair<String, String> userAccount, List<String> keywords,
-			List<List<Integer>> categoryGroups,
-			List<Pair<Integer, Integer>> prices) {
+	public Group(Pair<String, String> userAccount,
+			List<Pair<String, Pair<Integer, Integer>>> keywordsWithPrices,
+			List<Integer> categories) {
+		super();
 		this.userAccount = userAccount;
-		this.keywords = keywords;
-		this.categoryGroups = categoryGroups;
-		this.prices = prices;
+		this.keywordsWithPrices = keywordsWithPrices;
+		this.categories = categories;
 	}
 
 	public Group(String row) {
-		// superdealsyysi:Stupid123456###tom tom xl||| iPhone 5S
-		// supercharger###[293, 3270, 156955]###10:50|||100:150
+		String[] columns = row.split(CSV_SEPARATOR_1);
 
-		String[] columns = row.split("###");
+		parseUserCredentials(columns);
+		parseKeywordsWithPrices(columns);
+		parseCategories(columns);
+	}
 
+	public void parseUserCredentials(String[] columns) {
 		if (!columns[0].equals(EMPTY_USER)) {
-			String username = columns[0].split(":")[0];
-			String password = columns[0].split(":")[1];
-			userAccount = new Pair(username, password);
+			String[] params = columns[0].split(Pair.VALUE_SPLITTER);
+			userAccount = new Pair<String, String>(params[0], params[1]);
 		} else {
 			userAccount = null;
 		}
+	}
 
-		keywords = Arrays.asList(columns[1].split("\\|\\|\\|"));
+	public void parseKeywordsWithPrices(String[] columns) {
+		for (int i = 1; i < columns.length - 1; i++) {
+			String[] keywordColumns = columns[i].split(Pair.VALUE_SPLITTER);
 
-		// categorie groups
-		String[] categoriesGroups = columns[2].split("\\|\\|\\|");
+			String keyword = keywordColumns[0];
 
-		for (String string : categoriesGroups) {
-			String rawString = string.replace("[", "").replace("]", "").trim();
-			String[] categories = rawString.split(",");
+			Pair<Integer, Integer> prices = new Pair<Integer, Integer>(
+					Integer.parseInt(keywordColumns[1]),
+					Integer.parseInt(keywordColumns[2]));
 
-			List<Integer> category = new ArrayList<Integer>();
-			for (String string2 : categories) {
-				category.add(Integer.parseInt(string2.trim()));
-			}
-
-			categoryGroups.add(category);
+			keywordsWithPrices.add(new Pair<String, Pair<Integer, Integer>>(
+					keyword, prices));
 		}
+	}
 
-		// price
-		String[] pricesRaw = columns[3].split("\\|\\|\\|");
-		for (int i = 0; i < pricesRaw.length; i++) {
-			prices.add(new Pair<Integer, Integer>(Integer.parseInt(pricesRaw[i]
-					.split(Pair.VALUE_SPLITTER)[0]), Integer
-					.parseInt(pricesRaw[i].split(Pair.VALUE_SPLITTER)[1])));
-		}
+	public void parseCategories(String[] columns) {
+//		String rawString = columns[columns.length - 1].replace("[", "")
+//				.replace("]", "").trim();
+		String[] categoriesRaw = columns[columns.length - 1].split(",");
 
+		for (String s : categoriesRaw)
+			categories.add(Integer.parseInt(s.trim()));
 	}
 
 	@Override
 	public String toString() {
 
-		String keywordsReady = StringUtils.join(keywords, ITEM_SEPARATOR);
-		String categoriesReady = StringUtils.join(categoryGroups,
-				ITEM_SEPARATOR);
-		String pricesReady = StringUtils.join(prices, ITEM_SEPARATOR);
 		String userAccountReady = userAccount == null ? EMPTY_USER
 				: userAccount.toString();
 
+		List<String> keywords = new ArrayList<String>();
+		for (Pair p : keywordsWithPrices) {
+			keywords.add(p.toString());
+		}
+		String keywordsReady = StringUtils.join(keywords, CSV_SEPARATOR_1);
+		
+		String categoriesReady = categories.toString();
+
 		return StringUtils.join(new String[] { userAccountReady, keywordsReady,
-				categoriesReady, pricesReady }, CSV_SEPARATOR);
+				categoriesReady }, CSV_SEPARATOR_1);
 	}
 
 }

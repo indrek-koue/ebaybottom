@@ -75,15 +75,11 @@ public class Network {
 
 		List<Item> result = new ArrayList<>();
 
-		for (String keyword : group.keywords)
-			for (List<Integer> categories : group.categoryGroups)
-				for (Pair<Integer, Integer> price : group.prices) {
-
-					String uri = buildUri(keyword, categories, price.getKey(),
-							price.getValue());
-
-					result.addAll(ebayServerRequest(uri));
-				}
+		for (Pair<String, Pair<Integer, Integer>> item : group.keywordsWithPrices) {
+			result.addAll(ebayServerRequest(buildUri(item.getKey(),
+					group.categories, item.getValue().getKey(), item.getValue()
+							.getValue())));
+		}
 
 		return result;
 	}
