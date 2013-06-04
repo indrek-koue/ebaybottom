@@ -52,12 +52,12 @@ public class PrivateMessage {
 
 			Item selectedItem = items.get(i);
 			Pair<String, String> selectedMessage = messages.get(i);
-			if (!driver.getCurrentUrl().contains(
-					"contact.ebay.com/ws/eBayISAPI.dll?")) {
-				driver.get(composeMessageUrl(selectedItem));
-			} else {
+//			if (!driver.getCurrentUrl().contains(
+//					"contact.ebay.com/ws/eBayISAPI.dll?")) {
+//				driver.get(composeMessageUrl(selectedItem));
+//			} else {
 				new WebWindow(driver, composeMessageUrl(selectedItem));
-			}
+//			}
 
 			// select other
 			// <input type="radio" style="margin-top:0px;margin-top:-2px\9;"
