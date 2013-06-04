@@ -160,10 +160,20 @@ public class PrivateMessage {
 
 	private static void injectJavascriptOnResumeHighlightCaptchaTextbox() {
 		JavascriptExecutor js2 = (JavascriptExecutor) driver;
-		String onFocusFocus = "var s = document.createElement('script'); s.type = 'text/javascript'; "
-				+ "var code = 'window.onfocus = function () {document.getElementById(\"tokenText\").focus();}';"
-				+ "try {s.appendChild(document.createTextNode(code)); document.body.appendChild(s); } catch (e) {s.text = code; document.body.appendChild(s);}";
+		String onFocusFocus = "var s = document.createElement('script'); "
+				+ "s.type = 'text/javascript'; "
+				+ "var code = 'window.onfocus = function () {"
+				+ getEle(PRIVATEMESSAGE_TITLE_ID) + ".focus(); "
+				+ getEle(PRIVATEMESSAGE_BODY_ID) + ".focus(); "
+				+ getEle(CAPTCHA_ID) + ".focus();}';" + "try {"
+				+ "s.appendChild(document.createTextNode(code)); "
+				+ "document.body.appendChild(s);" + " } catch (e) {"
+				+ "s.text = code; " + "document.body.appendChild(s);" + "}";
 		js2.executeScript(onFocusFocus);
+	}
+
+	private static String getEle(String id) {
+		return "document.getElementById(\"" + id + "\")";
 	}
 
 	private static String composeMessageUrl(Item i) {
