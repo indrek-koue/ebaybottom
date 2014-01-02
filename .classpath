@@ -51,6 +51,6 @@
 	<classpathentry kind="lib" path="webdriver_libs/xalan-2.7.1.jar"/>
 	<classpathentry kind="lib" path="webdriver_libs/xercesImpl-2.10.0.jar"/>
 	<classpathentry kind="lib" path="webdriver_libs/xml-apis-1.4.01.jar"/>
-	<classpathentry kind="lib" path="lib/selenium-java-2.35.0.jar"/>
+	<classpathentry kind="lib" path="lib/selenium-java-2.39.0.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

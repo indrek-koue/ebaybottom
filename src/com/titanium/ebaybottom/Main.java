@@ -55,7 +55,7 @@ public class Main {
 	public static final String GROUP_FILE = "app_data/groups.txt";
 	public static final String DISPLAY_SEPARATOR = "|";
 
-	private static final int APP_VERSION = 14;
+	private static final int APP_VERSION = 15;
 	public static final boolean isDebug = false;
 
 	// superdealsyysi#Stupid123456
