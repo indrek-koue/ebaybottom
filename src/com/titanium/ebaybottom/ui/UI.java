@@ -86,7 +86,7 @@ public class UI {
 
 				UI.printListWithIndexNumbers(Config.messagesToUsers);
 
-				msg = Config.messagesToUsers.get(Main.isDebug ? 0 : UI
+				msg = Config.messagesToUsers.get(Main.forTestingAutoGenerateInput ? 0 : UI
 						.getUserInputInt());
 				isFirstRun = false;
 			}
@@ -98,7 +98,7 @@ public class UI {
 
 		List<Integer> selectedItems = new ArrayList<>();
 
-		String itemNumbersRaw = Main.isDebug ? "0"
+		String itemNumbersRaw = Main.forTestingAutoGenerateInput ? "0"
 				: UI.getUserInput("Enter sequence of numbers of items you wish to select "
 						+ "separated with , or with -  Example: 1,5,6,7,21 or 1-21");
 

@@ -55,8 +55,8 @@ public class Main {
 	public static final String GROUP_FILE = "app_data/groups.txt";
 	public static final String DISPLAY_SEPARATOR = "|";
 
-	private static final int APP_VERSION = 15;
-	public static final boolean isDebug = false;
+	private static final int APP_VERSION = 16;
+	public static final boolean forTestingAutoGenerateInput = false;
 
 	// superdealsyysi#Stupid123456
 	public static void main(String[] args) {
@@ -86,7 +86,7 @@ public class Main {
 				}
 
 				UI.printListWithIndexNumbers(groups);
-				Group group = groups.get(isDebug ? 0 : UI.getUserInputInt());
+				Group group = groups.get(forTestingAutoGenerateInput ? 0 : UI.getUserInputInt());
 
 				if (group.userAccount == null)
 					group.userAccount = Config.selectUserAccount();

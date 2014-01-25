@@ -12,6 +12,8 @@ import org.apache.http.client.utils.URIBuilder;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.util.EntityUtils;
 import org.joda.time.DateTime;
+import org.joda.time.format.DateTimeFormat;
+import org.joda.time.format.DateTimeFormatter;
 import org.openqa.selenium.By;
 import org.openqa.selenium.Cookie;
 import org.openqa.selenium.WebDriver;
@@ -92,6 +94,9 @@ public class Network {
 		return parseItems(returnJson);
 	}
 
+	/**
+	 * http://developer.ebay.com/DevZone/finding/CallRef/findItemsAdvanced.html
+	 */
 	private static String buildUri(String keyword, List<Integer> categories,
 			int minPrice, int maxPrice) {
 
@@ -145,9 +150,13 @@ public class Network {
 			// Limits the results to items ending on or after the specified
 			// time.
 			// 24h is user request
+			// ex: YYYY-MM-DDTHH:MM:SS.SSSZ (e.g., 2004-08-04T19:09:02.768Z)
+			DateTime date = new DateTime().plusHours(24);
+			DateTimeFormatter fmt = DateTimeFormat
+					.forPattern("YYYY-MM-DD'T'HH:mm:ss.SSS'Z'");
+
 			uBuilder.addParameter("itemFilter(3).name", "EndTimeFrom");
-			uBuilder.addParameter("itemFilter(3).value", new DateTime()
-					.plusHours(24).toString());
+			uBuilder.addParameter("itemFilter(3).value", fmt.print(date));
 
 			uri = uBuilder.build().toString();
 			UI.printDebug("REQUEST URL:" + uri);

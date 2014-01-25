@@ -108,7 +108,7 @@ public class Config {
 		UI.printListWithIndexNumbers(Config.users);
 
 		UI.printUI("Select user account. Enter -1 to leave this field empty");
-		int selectedIndex = Main.isDebug ? 0 : UI.getUserInputInt();
+		int selectedIndex = Main.forTestingAutoGenerateInput ? 0 : UI.getUserInputInt();
 
 		if (selectedIndex == -1)
 			return null;
